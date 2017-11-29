@@ -1,6 +1,6 @@
 Package: busboyr
 Version: 0.0.0.9000
-Title: What the Package Does (one line, title case)
+Title: File Searching and Organizing for Put.io
 Description: What the package does (one paragraph).
 Authors@R: person("First", "Last", , "first.last@example.com", c("aut", "cre"))
 License: What license it uses
@@ -13,3 +13,5 @@ Imports:
     dplyr
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
+URL: https://github.com/refik/busboyr
+BugReports: https://github.com/refik/busboyr/issues
