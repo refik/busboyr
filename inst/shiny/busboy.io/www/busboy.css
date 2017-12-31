@@ -1,0 +1,119 @@
+/* Account module */
+#putio_user_information .row {
+    margin-bottom: 0.5em;
+}
+
+#putio_user_information button {
+    margin-top: 1.5em;
+    margin-bottom: 3em;
+}
+
+/* Search module */
+#search {
+    margin-top: 1em;
+}
+#search .title-info {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#search button {
+    width: 100%;
+}
+
+#search .poster {
+    height: 13em;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+#search .poster-background {
+    width: 100%;
+    background-color: #F8F8F8;
+    height: 13em;
+}
+
+
+/* Title module */
+#title .poster {
+    max-width: 100%;
+    max-height:25em;
+    margin-right:auto;
+    margin-left:auto;
+    display:block;
+    margin-bottom:2em;
+}
+
+
+/* Season module */
+#season {
+    margin-bottom:46px;
+}
+
+#season .row {
+    margin-left: 0.2em;
+    margin-bottom: 0.5em;
+    line-height: 2em;
+}
+
+#season .putio-file-link {
+    line-height: 1em;
+}
+
+#season .number {
+    font-size: 1.5em;
+}
+
+#season .duration {
+    color: grey;
+    font-size: 0.9em;
+}
+
+#season .add-season {
+    margin-top: 1em;
+}
+
+
+/* Styles not specific to a page */
+
+body {
+    font-size: 15px !important;
+}
+
+*:focus {
+    outline: none !important;
+}
+
+.page-header {
+    margin: 25px 0 23px !important;
+}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.5; }
+    to { opacity: 1.0; }
+}
+
+@-webkit-keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.5; }
+    to { opacity: 1.0; }
+}
+
+.blink {
+  animation: fade 1500ms infinite;
+  -webkit-animation: fade 1500ms infinite;
+  -moz-animation: fade 1500ms infinite;
+}
+
+.navbar-default .navbar-brand {
+    padding-top: 11px;
+}
+
+.tab-content {
+    margin: 1em;
+}
+

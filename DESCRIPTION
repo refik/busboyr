@@ -1,17 +1,46 @@
 Package: busboyr
 Version: 0.0.0.9000
 Title: File Searching and Organizing for Put.io
-Description: What the package does (one paragraph).
-Authors@R: person("First", "Last", , "first.last@example.com", c("aut", "cre"))
-License: What license it uses
+Description: Busboy finds links associated with IMDB titles and adds them as a 
+  transfer to put.io It also neatly organizes files on put.io
+Authors@R: person("Refk", "Turkeli", , "refik.rfk@gmail.com", c("aut", "cre"))
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
 Suggests: 
     testthat
 Imports: 
-    dplyr
+    dplyr,
+    RPostgres,
+    memoise,
+    DBI,
+    shiny,
+    pool,
+    rlang,
+    shinyjs,
+    httr,
+    stringr,
+    assertthat,
+    jsonlite,
+    dbplyr,
+    purrr,
+    RMariaDB,
+    readr,
+    bit64,
+    lubridate,
+    aws.sqs,
+    uuid
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
 URL: https://github.com/refik/busboyr
 BugReports: https://github.com/refik/busboyr/issues
+Remotes: r-dbi/RPostgres,
+    r-dbi/dbi,
+    tidyverse/dplyr,
+    tidyverse/dbplyr,
+    tidyverse/purrr,
+    rstudio/pool,
+    rstudio/shiny,
+    r-dbi/RMariaDB,
+    cloudyr/aws.sqs

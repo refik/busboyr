@@ -20,6 +20,10 @@ The goal of busboyr is to ...
 
 This is a basic example which shows you how to solve a common problem:
 
+Check https://dba.stackexchange.com/questions/146135/psql-9-5-gen-random-uuid-not-working if gen_random_uuid() function on postgres doesn't work.
+
 ```{r example}
 ## basic example code
 ```
+
+
