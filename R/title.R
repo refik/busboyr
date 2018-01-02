@@ -13,3 +13,15 @@ get_title <- function(imdb_id) {
         jsonlite::fromJSON(cached)
     }
 }
+
+run_fn_infinite <- function(fn_name) {
+    func <- get(fn_name)
+    
+    repeat {
+        tryCatch(
+            func()
+        )
+        func()
+    }
+    
+}
