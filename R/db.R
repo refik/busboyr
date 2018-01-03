@@ -25,8 +25,8 @@ db_pool <- memoise::memoise(function() {
 #' @export
 insert_row <- function(con, table, values, returning = NULL) {
     assert_that(
-        any(purrr::map_lgl(values, is.null)), 
-        msg = glue("NULL value(s) while inserting to '{table}' table.")
+        all(!purrr::map_lgl(values, is.null)), 
+        msg = glue("Can't have NULL value(s) while inserting to '{table}' table.")
     )
 
     if (!is.null(returning)) {

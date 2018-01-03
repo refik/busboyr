@@ -76,8 +76,6 @@ account <- function(input, output, session) {
             )
         )
         
-        
-        
         pool::poolWithTransaction(pool, function(con) {
             # For some reason, user agent is not available in shiny server. Taking this
             # precaution to prevent an error in insert_row.
