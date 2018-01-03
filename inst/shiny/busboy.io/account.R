@@ -76,9 +76,16 @@ account <- function(input, output, session) {
             )
         )
         
+        
+        
         pool::poolWithTransaction(pool, function(con) {
+            # For some reason, user agent is not available in shiny server. Taking this
+            # precaution to prevent an error in insert_row.
+            user_agent <- session$request$HTTP_USER_AGENT
+            if (is.null(user_agent)) user_agent <- NA_character_
+            
             session_uuid <- busboyr::insert_row(con, "session", list(
-                user_agent = session$request$HTTP_USER_AGENT,
+                user_agent = user_agent,
                 ip_address = session$request$REMOTE_ADDR,
                 putio_user_id = user_id
             ), returning = "session_uuid")
