@@ -2,8 +2,8 @@
 #' 
 #' @export
 request_season <- function(putio_user_id, imdb_id, season) {
-    logger(glue("{putio_user_id}, {imdb_id}, {season}"))
-    
+    logger <- get_logger()
+
     missing_title <- title_status(putio_user_id, imdb_id, season) %>% 
         dplyr::filter(is.na(putio_user_file_id)) %>% 
         dplyr::pull(imdb_id)
@@ -29,8 +29,7 @@ request_season <- function(putio_user_id, imdb_id, season) {
 #' @export
 request_title <- function(putio_user_id, imdb_id, prefer_hd = FALSE, 
                           season_request_id = NULL) {
-    logger(glue("{putio_user_id}, {length(imdb_id)} titles, hd {prefer_hd}"),
-           glue("season request: {season_request_id}"))
+    logger <- get_logger()
     
     title_request_df <- dplyr::tibble(
         imdb_id = imdb_id,
@@ -46,7 +45,7 @@ request_title <- function(putio_user_id, imdb_id, prefer_hd = FALSE,
 #' 
 #' @export
 process_title_request <- function(title_request_id) {
-    logger(title_request_id)
+    logger <- get_logger()
     
     title_request <- get_record("title_request", title_request_id)
     
@@ -79,7 +78,7 @@ process_title_request <- function(title_request_id) {
 #' 
 #' @export
 process_season_request <- function(season_request_id) {
-    logger(season_request_id)
+    logger <- get_logger()
     
     season_request <- get_record("season_request", season_request_id)
 
@@ -115,7 +114,7 @@ process_season_request <- function(season_request_id) {
 #' @export
 title_request_start_download <- function(putio_user_id, title_request_id, 
                                          torrent_name, torrent_source) {
-    logger(glue("user: {putio_user_id} for {length(title_request_id)} titles."))
+    logger <- get_logger()
     
     pool::poolWithTransaction(db_pool(), function(con) {
         parent_id <- folder_buffer(putio_user_id)
@@ -149,12 +148,11 @@ title_request_start_download <- function(putio_user_id, title_request_id,
 #' 
 #' @export
 title_status <- function(putio_user_id, imdb_id, season = NULL) {
+    logger <- get_logger()
     con <- pool::poolCheckout(db_pool())
     on.exit(pool::poolReturn(con))
     
     if (!is.null(season)) {
-        logger(glue("user: {putio_user_id}, imdb: {imdb_id}"), 
-               glue("season: {season}"))
         episodes <- imdb_dataset_episode(imdb_id, season = season, con = con)
         
         title_file <- dplyr::tbl(con, "title_request_file") %>% 

@@ -2,7 +2,7 @@
 #' 
 #' @export
 folder_season <- memoise::memoise(function(putio_user_id, imdb_id, season) {
-    logger(glue("user: {putio_user_id}, imdb: {imdb_id}, season: {season}"))
+    logger <- get_logger()
     
     user_file_id <- dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
         dplyr::filter(putio_user_id == !!putio_user_id, type == "season",
@@ -42,10 +42,9 @@ folder_generic <- function(putio_user_id, folder_type) {
 #' 
 #' @export
 folder_save <- function(putio_user_id, folder_type, user_file_id, meta = NULL) {
+    logger <- get_logger()
     con <- pool::poolCheckout(db_pool())
     on.exit(pool::poolReturn(con))
-
-    logger(glue("Saving {folder_type} folder"))
     
     if (!is.null(meta)) {
         meta <- jsonlite::toJSON(meta, auto_unbox = TRUE) %>% 
@@ -117,7 +116,7 @@ folder_series <- function(putio_user_id) {
 #' 
 #' @export
 folder_series_imdb <- function(putio_user_id, imdb_id) {
-    logger(glue("user: {putio_user_id}, imdb: {imdb_id}"))
+    logger <- get_logger()
     
     user_file_id <- dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
         dplyr::filter(putio_user_id == !!putio_user_id, 

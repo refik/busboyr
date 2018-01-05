@@ -16,11 +16,12 @@ task_create <- function(worker_function, arguments) {
 #' Consumes a given task
 #' 
 #' @export
-task_consume <- function() {
-    sqs_message <- aws.sqs::receive_msg(task_queue_name, timeout = 10)
+task_consume <- function(wait = NULL) {
+    logger <- get_logger()
+    sqs_message <- aws.sqs::receive_msg(task_queue_name, wait = wait)
     
     if (nrow(sqs_message) == 0) {
-        message("No message in task queue.")
+        logger("No message in task queue.")
         return()
     }
     

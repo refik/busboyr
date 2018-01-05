@@ -14,14 +14,23 @@ get_title <- function(imdb_id) {
     }
 }
 
-run_fn_infinite <- function(fn_name) {
-    func <- get(fn_name)
+#' Run function in a loop
+#' 
+#' @export
+consume_loop <- function(queue = c("task", "callback", "both")) {
+    logger <- get_logger()
     
-    repeat {
-        tryCatch(
-            func()
-        )
-        func()
-    }
-    
+    fn <- list(
+        task = task_consume,
+        callback = transfer_complete_consume,
+        both = function() {
+            logger("Consuming both queues shortly for interative use.")
+            task_consume(wait = 1)
+            transfer_complete_consume(wait = 1)
+            logger("Sleeping for 2 seconds.")
+            Sys.sleep(2)
+        }
+    )[[match.arg(queue)]]
+
+    repeat fn()
 }

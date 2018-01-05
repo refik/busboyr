@@ -3,8 +3,9 @@ transfer_complete_queue_name <- "putio_transfer_complete"
 #' Consumes transfer complete tasks from putio
 #' 
 #' @export
-transfer_complete_consume <- function() {
-    sqs_message <- aws.sqs::receive_msg(transfer_complete_queue_name, timeout = 20)
+transfer_complete_consume <- function(wait = NULL) {
+    logger <- get_logger()
+    sqs_message <- aws.sqs::receive_msg(transfer_complete_queue_name, wait = wait)
     
     if (nrow(sqs_message) == 0) {
         message("No message in transfer complete queue.")

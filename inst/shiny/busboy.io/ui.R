@@ -15,6 +15,9 @@ shiny::tagList(
     shinyjs::useShinyjs(),
     shiny::navbarPage(
         title = shiny::tags$img(src = "logo.png"), 
+        shiny::suppressDependencies("bootstrap"),
+        htmltools::htmlDependency(name = "bootstrap.min.js", version ="3.3.7", 
+                                  src = c(href = "https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"), script = "bootstrap.min.js"),
         theme = "paper_theme.css", selected = "search", 
         id = "busboy_navbar", windowTitle = "Busboy", fluid = FALSE,
         shiny::tabPanel("Account", value = "account",

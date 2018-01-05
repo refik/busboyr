@@ -10,6 +10,10 @@ torrentapi_token <- memoise::memoise(function() {
         query = list(get_token = "get_token")
     )
     
+    # There is a 1req/2sec limit and the first time this function is called,
+    # the next call definitly fails without sleep.
+    Sys.sleep(1)
+    
     httr::content(response, "parsed")$token
 }, ~memoise::timeout(15 * 60)) # tokens expire in 15 minutes
 
@@ -18,8 +22,7 @@ torrentapi_token <- memoise::memoise(function() {
 #' @export
 torrentapi_imdb_search <- function(imdb_id, season = NULL, episode = NULL, 
                                    season_pack_only = FALSE) {
-    logger(glue("imdb: {imdb_id}"), glue("season: {season}"), glue("episode: {episode}"), 
-           glue("season pack: {season_pack_only}"), prepend_call = TRUE)
+    logger <- get_logger()
     
     query <- list(
         token = torrentapi_token(),

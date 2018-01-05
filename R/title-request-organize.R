@@ -2,10 +2,9 @@
 #' 
 #' @export
 organize_download <- function(putio_user_id, putio_user_download_id) {
+    logger <- get_logger()
     con <- pool::poolCheckout(db_pool())
     on.exit(pool::poolReturn(con))
-    
-    logger(glue("user: {putio_user_id}, download: {putio_user_download_id}"))
 
     transfer <- putio_get_transfer(putio_user_id, putio_user_download_id)$json$transfer
     
