@@ -18,7 +18,7 @@ get_title <- function(imdb_id) {
 #' 
 #' @export
 consume_loop <- function(queue = c("task", "callback", "both")) {
-    logger <- get_logger()
+    logger <- get_logger("consume_loop")
     
     fn <- list(
         task = task_consume,

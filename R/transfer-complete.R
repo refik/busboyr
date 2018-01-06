@@ -28,9 +28,12 @@ transfer_complete_consume <- function(wait = NULL) {
 #' 
 #' @export
 transfer_complete_refresh_shiny <- function(putio_user_id) {
+    logger <- get_logger()
+    
     active_session_uuid <- dplyr::tbl(db_pool(), "session") %>% 
-        dplyr::filter(putio_user_id == !!putio_user_id, is.na(ended_at)) %>% 
-        dplyr::pull(session_uuid)
+        dplyr::filter(putio_user_id == !!putio_user_id, is.na(ended_at)) %>%
+        dplyr::arrange(desc(id)) %>% 
+        head(1) %>% dplyr::pull(session_uuid)
     
     assert_that(length(active_session_uuid) == 1)
     

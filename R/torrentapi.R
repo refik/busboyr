@@ -12,7 +12,7 @@ torrentapi_token <- memoise::memoise(function() {
     
     # There is a 1req/2sec limit and the first time this function is called,
     # the next call definitly fails without sleep.
-    Sys.sleep(1)
+    Sys.sleep(2)
     
     httr::content(response, "parsed")$token
 }, ~memoise::timeout(15 * 60)) # tokens expire in 15 minutes

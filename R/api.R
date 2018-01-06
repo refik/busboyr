@@ -2,7 +2,6 @@
 #' 
 #' @export
 cache_api_response <- function(response) {
-    logger <- get_logger()
     parsed_url <- httr::parse_url(response$request$url)
     response_json_text <- httr::content(response, "text", encoding = "UTF-8")
     to_json_text <- function(obj) as.character(jsonlite::toJSON(obj, auto_unbox = TRUE))

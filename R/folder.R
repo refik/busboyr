@@ -2,7 +2,7 @@
 #' 
 #' @export
 folder_season <- memoise::memoise(function(putio_user_id, imdb_id, season) {
-    logger <- get_logger()
+    logger <- get_logger("folder_season")
     
     user_file_id <- dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
         dplyr::filter(putio_user_id == !!putio_user_id, type == "season",

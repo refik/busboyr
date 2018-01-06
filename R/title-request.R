@@ -78,7 +78,7 @@ process_title_request <- function(title_request_id) {
 #' 
 #' @export
 process_season_request <- function(season_request_id) {
-    logger <- get_logger()
+    logger <- get_logger("process_season_request")
     
     season_request <- get_record("season_request", season_request_id)
 
