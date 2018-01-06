@@ -4,7 +4,7 @@ transfer_complete_queue_name <- "putio_transfer_complete"
 #' 
 #' @export
 transfer_complete_consume <- function(wait = NULL) {
-    logger <- get_logger()
+    logger <- get_logger("transfer_complete_consume")
     sqs_message <- aws.sqs::receive_msg(transfer_complete_queue_name, wait = wait)
     
     if (nrow(sqs_message) == 0) {
