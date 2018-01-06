@@ -17,7 +17,7 @@ task_create <- function(worker_function, arguments) {
 #' 
 #' @export
 task_consume <- function(wait = NULL) {
-    logger <- get_logger()
+    logger <- get_logger("task_consume")
     sqs_message <- aws.sqs::receive_msg(task_queue_name, wait = wait)
     
     if (nrow(sqs_message) == 0) {
