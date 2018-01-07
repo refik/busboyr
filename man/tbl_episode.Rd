@@ -4,7 +4,7 @@
 \alias{tbl_episode}
 \title{Get episodes of a series}
 \usage{
-tbl_episode(title_id, season = NULL, con = NULL)
+tbl_episode(title_id, season = NULL, ...)
 }
 \description{
 Get episodes of a series

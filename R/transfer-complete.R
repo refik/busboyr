@@ -13,8 +13,9 @@ transfer_complete_consume <- function(wait = NULL) {
     }
     
     callback_uuid <- sqs_message$Body
-    expected_callback <- get_record("putio_transfer_complete_callback", callback_uuid, 
-                                    column = "callback_uuid")
+    
+    # TODO: Fix this
+    expected_callback <- get_record("putio_transfer_complete_callback", callback_uuid)
 
     organize_download(expected_callback$putio_user_id, 
                       expected_callback$putio_user_download_id)

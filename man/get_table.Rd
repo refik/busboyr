@@ -4,7 +4,7 @@
 \alias{get_table}
 \title{Shortcut for getting a table}
 \usage{
-get_table(table)
+get_table(table, con = db_pool(), ...)
 }
 \description{
 Shortcut for getting a table
