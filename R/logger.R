@@ -37,7 +37,7 @@ get_logger <- function(calling_fn_name = NULL, exclude_vars = character()) {
             else as.character(arg_val)
         }) %>% 
         purrr::map_chr(function(arg_val) {
-            if (nchar(arg_val) > 11) glue("<{strtrim(arg_val, 7)}>")
+            if (nchar(arg_val) > 15) glue("<{strtrim(arg_val, 13)}>")
             else arg_val
         })
     
