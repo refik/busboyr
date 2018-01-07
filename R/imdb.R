@@ -32,7 +32,7 @@ imdb_download <- function(type = c("episode", "basics")) {
 
     url <- glue("http://datasets.imdbws.com/title.{type}.tsv.gz")
     logger(glue("Downloading to file'{output_file}'"))
-    download.file(url, output_file)
+    download.file(url, output_file, method = "wget")
     
     output_file
 }
