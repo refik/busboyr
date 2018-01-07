@@ -53,9 +53,9 @@ get_logger <- function(calling_fn_name = NULL, exclude_vars = character()) {
         calling_fn_args_str <- "<empty>"
     }
 
-    first_call_log_template <- "[tm] {now_debug()} [fn] {calling_fn_name} [env] {calling_fn_args_str}"
+    first_call_log_template <- "[fn] {calling_fn_name} [env] {calling_fn_args_str}"
     message(glue(first_call_log_template))
     
-    log_template <- "[tm] {now_debug()} [fn] {calling_fn_name} [msg] {msg}"
+    log_template <- "[fn] {calling_fn_name} [msg] {msg}"
     function(msg) message(glue(log_template))
 }

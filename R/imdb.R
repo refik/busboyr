@@ -63,7 +63,7 @@ imdb_write <- function(episode_file = NULL, basics_file = NULL) {
         dplyr::select(
             id = "tconst", type = "titleType", name = "primaryTitle",
             year = "startYear", duration_minute = "runtimeMinutes") %>% 
-        dplyr::mutate_at(c("start", "duration"), as.integer)
+        dplyr::mutate_at(c("year", "duration_minute"), as.integer)
     
     combined_data <- dplyr::left_join(title_data, episode_data, by = "id")
 
@@ -73,4 +73,6 @@ imdb_write <- function(episode_file = NULL, basics_file = NULL) {
         DBI::dbSendStatement(con, "TRUNCATE title")
         DBI::dbWriteTable(con, "title", combined_data, append = TRUE)
     })
+    
+    logger("Complete")
 }
