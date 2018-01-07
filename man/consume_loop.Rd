@@ -4,7 +4,7 @@
 \alias{consume_loop}
 \title{Run function in a loop}
 \usage{
-consume_loop(queue = c("task", "callback"))
+consume_loop(queue = c("task", "callback", "both"))
 }
 \description{
 Run function in a loop

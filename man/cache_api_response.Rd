@@ -4,7 +4,7 @@
 \alias{cache_api_response}
 \title{Cache a response to json api}
 \usage{
-cache_api_response(response)
+cache_api_response(response, user_id = NULL)
 }
 \description{
 Cache a response to json api

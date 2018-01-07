@@ -4,7 +4,7 @@
 \alias{task_consume}
 \title{Consumes a given task}
 \usage{
-task_consume()
+task_consume(wait = NULL)
 }
 \description{
 Consumes a given task

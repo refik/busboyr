@@ -4,7 +4,7 @@
 \alias{get_logger}
 \title{Get a logger function}
 \usage{
-get_logger(...)
+get_logger(calling_fn_name = NULL, exclude_vars = character())
 }
 \description{
 Get a logger function

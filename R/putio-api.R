@@ -5,11 +5,10 @@ putio_api_url <- "https://api.put.io"
 #' @export
 putio_get_token <- memoise::memoise(function(putio_user_id) {
     user_id <- as.character(putio_user_id)
-    dplyr::tbl(db_pool(), "api_response") %>% 
+    get_table("api") %>% 
         dplyr::filter(hostname == "api.put.io", path == "v2/account/info", 
                       sql("response#>'{info,user_id}'") == !!user_id) %>% 
-        dplyr::arrange(desc(id)) %>% 
-        head(1) %>% 
+        filter_last() %>% 
         lax_select("query->>'oauth_token'") %>% 
         dplyr::pull()
 })

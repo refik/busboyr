@@ -2,24 +2,10 @@
 % Please edit documentation in R/db.R
 \name{random_string}
 \alias{random_string}
-\title{#' Escaping integer64 for sql queries
-#'
-#' @export
-escape.integer64 <- function(x, parens = NA, collapse = ", ", con = NULL) {
-x\link{is.na(x)} <- "NULL"
-dbplyr::sql_vector(x, parens, collapse)
-}
-Generate random string}
+\title{Generate random string}
 \usage{
 random_string(n = 10)
 }
 \description{
-#' Escaping integer64 for sql queries
-#'
-#' @export
-escape.integer64 <- function(x, parens = NA, collapse = ", ", con = NULL) {
-x\link{is.na(x)} <- "NULL"
-dbplyr::sql_vector(x, parens, collapse)
-}
 Generate random string
 }

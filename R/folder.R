@@ -1,153 +1,65 @@
-#' Get a seasons folder on put.io for a user
+#' Get busboy folders file_id on put.io
 #' 
 #' @export
-folder_season <- memoise::memoise(function(putio_user_id, imdb_id, season) {
-    logger <- get_logger("folder_season")
+get_folder <- function(user_id, type, title_id = NULL, season = NULL) {
+    logger <- get_logger()
     
-    user_file_id <- dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
-        dplyr::filter(putio_user_id == !!putio_user_id, type == "season",
-                      sql("meta ->> 'imdb_id'") == !!imdb_id,
-                      sql("meta ->> 'season'") == as.character(season)) %>% 
-        dplyr::arrange(desc(id)) %>% 
-        head(1) %>% 
-        dplyr::pull(putio_user_file_id)
+    folder <- get_table("folder") %>% 
+        dplyr::filter(user_id == !!user_id, type == !!type)
     
-    if (length(user_file_id) == 0) {
-        logger("Folder not found, creating it")
-        series_user_file_id <- folder_series_imdb(putio_user_id, imdb_id)
-        api_response <- putio_create_folder(putio_user_id, name = glue("Season {season}"), 
-                                            parent_id = series_user_file_id)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "season", user_file_id, meta = list(
-            imdb_id = imdb_id,
+    if (!is.null(title_id)) {
+        folder <- dplyr::filter(folder, title_id == !!title_id)
+        if (!is.null(season)) {
+            folder <- dplyr::filter(folder, season == !!season)
+        }
+    }
+    
+    file_id <- folder %>% 
+        filter_last() %>% 
+        dplyr::pull(id)
+    
+    if (length(file_id) == 0) {
+        logger("Folder not found. Creating it.")
+        
+        folder_def <- list(
+            root = list(name = "Busboy"),
+            season = list(parent = "series", type = "season"),
+            series = list(parent = "series_root", type = "series"),
+            buffer = list(parent = "root", name = "Files to Organize", type = "buffer"),
+            series_root = list(parent = "root", name = "Series", type = "series_root"),
+            movies_root = list(parent = "root", name = "Movies", type = "movies_root")
+        )[[type]]
+
+        parent_type <- folder_def$parent
+        
+        if (is.null(parent_type)) {
+            parent_id <- 0
+        } else if (parent_type == "series") {
+            parent_id <- get_folder(user_id, parent_type, title_id)
+        } else {
+            parent_id <- get_folder(user_id, parent_type)
+        }
+        
+        if (type == "series") {
+            folder_def$name <- get_record("title", title_id)$name
+        } else if (type == "season") {
+            folder_def$name <- glue("Season {season}")
+        }
+        
+        api <- putio_create_folder(user_id, name = folder_def$name, 
+                                   parent_id = parent_id)
+        
+        file_id <- api$file$id
+        
+        insert_row("folder", list(
+            id = file_id,
+            user_id = user_id,
+            type = type,
+            title_id = title_id,
             season = season
         ))
     }
     
-    user_file_id
-})
-
-#' Get the last created folder type id
-#' 
-#' @export
-folder_generic <- function(putio_user_id, folder_type) {
-    dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
-        dplyr::filter(putio_user_id == !!putio_user_id, type == !!folder_type) %>% 
-        dplyr::arrange(desc(id)) %>% 
-        head(1) %>% 
-        dplyr::pull(putio_user_file_id)
+    file_id
 }
 
-#' Saves folder user_file_id
-#' 
-#' @export
-folder_save <- function(putio_user_id, folder_type, user_file_id, meta = NULL) {
-    logger <- get_logger()
-    con <- pool::poolCheckout(db_pool())
-    on.exit(pool::poolReturn(con))
-    
-    if (!is.null(meta)) {
-        meta <- jsonlite::toJSON(meta, auto_unbox = TRUE) %>% 
-            as.character()
-    } else {
-        meta <- NA_character_
-    }
-    
-    insert_row(con, "putio_busboy_folder", list(
-        putio_user_id = putio_user_id,
-        type = folder_type,
-        putio_user_file_id = user_file_id,
-        meta = meta
-    ))
-}
-
-#' Get the buffer download folder
-#' 
-#' @export
-folder_buffer <- function(putio_user_id) {
-    user_file_id <- folder_generic(putio_user_id, "buffer")
-    
-    if (length(user_file_id) == 0) {
-        root_user_file_id <- folder_root(putio_user_id)
-        api_response <- putio_create_folder(putio_user_id, name = "Files to Organize", 
-                                            parent_id = root_user_file_id)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "buffer", user_file_id)
-    }
-    
-    user_file_id
-}
-
-#' Get the movies folder
-#' 
-#' @export
-folder_movies <- function(putio_user_id) {
-    user_file_id <- folder_generic(putio_user_id, "movies")
-    
-    if (length(user_file_id) == 0) {
-        root_user_file_id <- folder_root(putio_user_id)
-        api_response <- putio_create_folder(putio_user_id, name = "Movies", 
-                                            parent_id = root_user_file_id)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "movies", user_file_id)
-    }
-    
-    user_file_id
-}
-
-#' Get the series folder
-#' 
-#' @export
-folder_series <- function(putio_user_id) {
-    user_file_id <- folder_generic(putio_user_id, "series")
-    
-    if (length(user_file_id) == 0) {
-        root_user_file_id <- folder_root(putio_user_id)
-        api_response <- putio_create_folder(putio_user_id, name = "Series", 
-                                            parent_id = root_user_file_id)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "series", user_file_id)
-    }
-    
-    user_file_id
-}
-
-#' Get a specific series folder
-#' 
-#' @export
-folder_series_imdb <- function(putio_user_id, imdb_id) {
-    logger <- get_logger()
-    
-    user_file_id <- dplyr::tbl(db_pool(), "putio_busboy_folder") %>% 
-        dplyr::filter(putio_user_id == !!putio_user_id, 
-                      sql("meta ->> 'imdb_id'") == !!imdb_id) %>% 
-        dplyr::pull(putio_user_file_id)
-    
-    if (length(user_file_id) == 0) {
-        logger("Folder not found. Creating it.")
-        series_user_file_id <- folder_series(putio_user_id)
-        title <- get_record("imdb_dataset", imdb_id, column = "imdb_id")
-        api_response <- putio_create_folder(putio_user_id, name = title$name, 
-                                            parent_id = series_user_file_id)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "series_imdb", user_file_id, 
-                    meta = list(imdb_id = imdb_id))
-    }
-    
-    user_file_id
-}
-
-#' Get the root busboy folder
-#' 
-#' @export
-folder_root <- function(putio_user_id) {
-    user_file_id <- folder_generic(putio_user_id, "root")
-    
-    if (length(user_file_id) == 0) {
-        api_response <- putio_create_folder(putio_user_id, name = "Busboy", parent_id = 0)
-        user_file_id <- api_response$json$file$id
-        folder_save(putio_user_id, "root", user_file_id)
-    }
-    
-    user_file_id
-}

@@ -4,7 +4,7 @@
 \alias{transfer_complete_consume}
 \title{Consumes transfer complete tasks from putio}
 \usage{
-transfer_complete_consume()
+transfer_complete_consume(wait = NULL)
 }
 \description{
 Consumes transfer complete tasks from putio

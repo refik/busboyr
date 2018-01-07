@@ -23,11 +23,14 @@ db_pool <- memoise::memoise(function() {
 #' Does interpolation to prevent sql injection.
 #' 
 #' @export
-insert_row <- function(con, table, values, returning = NULL) {
-    assert_that(
-        all(!purrr::map_lgl(values, is.null)), 
-        msg = glue("Can't have NULL value(s) while inserting to '{table}' table.")
-    )
+insert_row <- function(table, values, returning = NULL, con = NULL) {
+    if (is.null(con)) {
+        con <- pool::poolCheckout(db_pool())
+        on.exit(pool::poolReturn(con))
+    }
+    
+    # Discarding NULL values. They can't be inserted.
+    values <- purrr::discard(values, is.null)
 
     if (!is.null(returning)) {
         returning_statement <- glue("RETURNING {returning}")
@@ -51,17 +54,10 @@ insert_row <- function(con, table, values, returning = NULL) {
         DBI::dbClearResult(result)
         id[[1]]
     } else {
+        DBI::dbClearResult(result)
         result
     }
 }
-
-#' #' Escaping integer64 for sql queries
-#' #'
-#' #' @export
-#' escape.integer64 <- function(x, parens = NA, collapse = ", ", con = NULL) {
-#'     x[is.na(x)] <- "NULL"
-#'     dbplyr::sql_vector(x, parens, collapse)
-#' }
 
 #' Generate random string
 #' 
@@ -84,9 +80,25 @@ lax_select <- function(.data, select_expr) {
 #' Generic function for getting record by id
 #' 
 #' @export
-get_record <- memoise::memoise(function(table, record_id, column = "id") {
-    dplyr::tbl(db_pool(), table) %>% 
-        dplyr::filter(sql(column) == !!record_id) %>% 
+get_record <- memoise::memoise(function(table, record_id) {
+    get_table(table) %>% 
+        dplyr::filter(id == !!record_id) %>% 
         dplyr::collect() %>% 
         as.list()
 })
+
+#' Shortcut for getting a table
+#' 
+#' @export
+get_table <- function(table, con = db_pool(), ...) {
+    # Suppressing warning for getting rid of
+    # unknown column type warnings
+    suppressWarnings(dplyr::tbl(con, table))
+}
+
+#' Shortcut for filtering the last record
+#' 
+#' @export
+filter_last <- function(.data) {
+    dplyr::arrange(.data, desc(id)) %>% head(1)
+}

@@ -31,13 +31,13 @@ get_logger <- function(calling_fn_name = NULL, exclude_vars = character()) {
     }
     calling_fn_args <- as.list(parent.frame())
     calling_fn_args <- calling_fn_args %>% 
-        purrr::discard(is.null) %>% # Discarding NULLs
+        purrr::discard(~ is.null(.) || is.na(.)) %>% # Discarding NULLs
         purrr::map_chr(function(arg_val) {
             if (length(arg_val) > 1) glue("<vec({length(arg_val)})>")
             else as.character(arg_val)
         }) %>% 
         purrr::map_chr(function(arg_val) {
-            if (nchar(arg_val) > 11) paste0(strtrim(arg_val, 7), "...")
+            if (nchar(arg_val) > 11) glue("<{strtrim(arg_val, 7)}>")
             else arg_val
         })
     
@@ -50,12 +50,12 @@ get_logger <- function(calling_fn_name = NULL, exclude_vars = character()) {
             unlist(calling_fn_args), 
             sep = ":", collapse = ", ")
     } else {
-        calling_fn_args_str <- ""
+        calling_fn_args_str <- "<empty>"
     }
 
-    first_call_log_template <- "{now_debug()} - {calling_fn_name} - {calling_fn_args_str}"
+    first_call_log_template <- "[tm] {now_debug()} [fn] {calling_fn_name} [env] {calling_fn_args_str}"
     message(glue(first_call_log_template))
     
-    log_template <- "{now_debug()} - {calling_fn_name} - {msg}"
+    log_template <- "[tm] {now_debug()} [fn] {calling_fn_name} [msg] {msg}"
     function(msg) message(glue(log_template))
 }

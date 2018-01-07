@@ -4,7 +4,7 @@
 \alias{insert_row}
 \title{Insert a row to db}
 \usage{
-insert_row(con, table, values, returning = NULL)
+insert_row(table, values, returning = NULL, con = NULL)
 }
 \description{
 Does interpolation to prevent sql injection.
