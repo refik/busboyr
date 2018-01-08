@@ -4,8 +4,7 @@
 \alias{putio_account_info}
 \title{put.io account information}
 \usage{
-putio_account_info(putio_user_id = NULL,
-  oauth_token = putio_get_token(putio_user_id))
+putio_account_info(user_id = NULL, oauth_token = putio_get_token(user_id))
 }
 \description{
 put.io account information

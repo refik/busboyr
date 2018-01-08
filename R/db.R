@@ -69,10 +69,10 @@ random_string <- function(n = 10) {
 #' Select statement with no column name control
 #' 
 #' @export
-lax_select <- function(.data, select_expr) {
+lax_select <- function(tbl, select_expr) {
     alias <- random_string()
-    original_query <- dbplyr::sql_render(.data)
-    con <- .data$src$con
+    original_query <- dbplyr::sql_render(tbl)
+    con <- tbl$src$con
     query <- glue("SELECT {select_expr} FROM ({original_query}) \"{alias}\"")
     dplyr::tbl(con, from = dplyr::sql(query))
 }
@@ -80,10 +80,11 @@ lax_select <- function(.data, select_expr) {
 #' Generic function for getting record by id
 #' 
 #' @export
-get_record <- memoise::memoise(function(table, record_id) {
-    get_table(table) %>% 
+get_record <- memoise::memoise(function(table, record_id, ...) {
+    get_table(table, ...) %>% 
         dplyr::filter(id == !!record_id) %>% 
         dplyr::collect() %>% 
+        purrr::modify_if(is.na, ~NULL) %>% 
         as.list()
 })
 
@@ -99,6 +100,13 @@ get_table <- function(table, con = db_pool(), ...) {
 #' Shortcut for filtering the last record
 #' 
 #' @export
-filter_last <- function(.data) {
-    dplyr::arrange(.data, desc(id)) %>% head(1)
+filter_last <- function(tbl) {
+    dplyr::arrange(tbl, desc(id)) %>% head(1)
+}
+
+#' Shortcut for getting the count from db
+#' 
+#' @export
+pull_count <- function(tbl) {
+    dplyr::count(tbl) %>% dplyr::pull()
 }

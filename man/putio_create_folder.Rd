@@ -4,8 +4,8 @@
 \alias{putio_create_folder}
 \title{Create folder on put.io}
 \usage{
-putio_create_folder(putio_user_id = NULL, name, parent_id = 0,
-  oauth_token = putio_get_token(putio_user_id))
+putio_create_folder(user_id = NULL, name, parent_id = 0,
+  oauth_token = putio_get_token(user_id))
 }
 \description{
 Create folder on put.io

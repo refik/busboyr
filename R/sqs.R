@@ -12,27 +12,22 @@ sqs_url_to_arn <- function(queue_url) {
 #' 
 #' @export
 sqs_public_policy <- function(queue_url) {
-    policy_id <- random_string(5)
-    queue_arn <- sqs_url_to_arn(queue_url)
-    policy <- glue('
-{{
-  "Version": "2012-10-17",
-  "Id": "{policy_id}",
-  "Statement": [
-    {{
-      "Sid": "1",
-      "Effect": "Allow",
-      "Principal": "*",
-      "Action": [
-        "SQS:ReceiveMessage",
-        "SQS:DeleteMessage"
-      ],
-      "Resource": "{queue_arn}"
-    }}
-  ]
-}}
+    glue('
+        {{
+            "Version": "2012-10-17",
+            "Id": "{random_string()}",
+            "Statement": [
+                {{
+                    "Sid": "1",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": [
+                        "SQS:ReceiveMessage",
+                        "SQS:DeleteMessage"
+                    ],
+                    "Resource": "{sqs_url_to_arn(queue_url)}"
+                }}
+            ]
+        }}
     ')
-    
-    # Compressing
-    stringr::str_replace_all(policy, "[ \\n]", "")
 }

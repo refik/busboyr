@@ -4,7 +4,7 @@
 \alias{putio_file_link}
 \title{Link to users putio file}
 \usage{
-putio_file_link(putio_user_file_id)
+putio_file_link(file_id)
 }
 \description{
 Link to users putio file

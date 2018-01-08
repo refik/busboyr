@@ -4,7 +4,7 @@
 \alias{omdb_search}
 \title{Search OMDB for a title}
 \usage{
-omdb_search(query)
+omdb_search(query, ...)
 }
 \description{
 Search OMDB for a title

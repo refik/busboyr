@@ -4,8 +4,8 @@
 \alias{putio_add_transfer}
 \title{Add transfer to put.io}
 \usage{
-putio_add_transfer(putio_user_id = NULL, source, save_parent_id = 0,
-  callback_uuid = NULL, oauth_token = putio_get_token(putio_user_id))
+putio_add_transfer(user_id = NULL, source, save_parent_id = 0,
+  callback_url = NULL, oauth_token = putio_get_token(user_id))
 }
 \description{
 Add transfer to put.io

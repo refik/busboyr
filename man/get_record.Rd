@@ -4,7 +4,7 @@
 \alias{get_record}
 \title{Generic function for getting record by id}
 \usage{
-get_record(table, record_id)
+get_record(table, record_id, ...)
 }
 \description{
 Generic function for getting record by id

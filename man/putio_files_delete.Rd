@@ -4,8 +4,8 @@
 \alias{putio_files_delete}
 \title{Delete  a file on put.io}
 \usage{
-putio_files_delete(putio_user_id = NULL, user_file_id,
-  oauth_token = putio_get_token(putio_user_id))
+putio_files_delete(user_id = NULL, file_id,
+  oauth_token = putio_get_token(user_id))
 }
 \description{
 Delete  a file on put.io

@@ -4,7 +4,7 @@
 #' reading function instead.
 #' 
 #' @export
-imdb_read <- function(type = c("episode", "basics"), file_name) {
+read_imdb <- function(type = c("episode", "basics"), file_name) {
     logger <- get_logger()
     
     type <- match.arg(type)
@@ -24,7 +24,7 @@ imdb_read <- function(type = c("episode", "basics"), file_name) {
 #' Download imdb dataset
 #' 
 #' @export
-imdb_download <- function(type = c("episode", "basics")) {
+download_imdb <- function(type = c("episode", "basics")) {
     logger <- get_logger()
     
     type <- match.arg(type)
@@ -40,26 +40,26 @@ imdb_download <- function(type = c("episode", "basics")) {
 #' Write imdb dataset to db
 #' 
 #' @export
-imdb_write <- function(episode_file = NULL, basics_file = NULL) {
+write_imdb <- function(episode_file = NULL, basics_file = NULL) {
     logger <- get_logger("imdb_write")
     
     if (is.null(episode_file)) {
-        episode_file <- imdb_download("episode")
+        episode_file <- download_imdb("episode")
     }
     
     if (is.null(basics_file)) {
-        basics_file <- imdb_download("basics")
+        basics_file <- download_imdb("basics")
     }
     
     logger("Tidying imdb data")
 
-    episode_data <- imdb_read("episode", episode_file) %>% 
+    episode_data <- read_imdb("episode", episode_file) %>% 
         dplyr::select(
             id = "tconst", parent_id = "parentTconst", 
             season = "seasonNumber", episode = "episodeNumber") %>% 
         dplyr::mutate_at(c("season", "episode"), as.integer)
 
-    title_data <- imdb_read("basics", basics_file) %>% 
+    title_data <- read_imdb("basics", basics_file) %>% 
         dplyr::select(
             id = "tconst", type = "titleType", name = "primaryTitle",
             year = "startYear", duration_minute = "runtimeMinutes") %>% 

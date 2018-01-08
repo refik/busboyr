@@ -2,10 +2,10 @@
 % Please edit documentation in R/title.R
 \name{get_title}
 \alias{get_title}
-\title{Get title information}
+\title{Get detailed title information}
 \usage{
-get_title(imdb_id)
+get_title(title_id)
 }
 \description{
-Get title information
+Get detailed title information
 }

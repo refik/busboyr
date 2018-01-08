@@ -4,8 +4,8 @@
 \alias{putio_files_rename}
 \title{Rename a file on put.io}
 \usage{
-putio_files_rename(putio_user_id = NULL, user_file_id, new_name,
-  oauth_token = putio_get_token(putio_user_id))
+putio_files_rename(user_id = NULL, file_id, new_name,
+  oauth_token = putio_get_token(user_id))
 }
 \description{
 Rename a file on put.io

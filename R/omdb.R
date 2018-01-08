@@ -3,22 +3,23 @@ omdb_api_url <- "https://www.omdbapi.com"
 #' Search OMDB for a title
 #' 
 #' @export
-omdb_search <- function(query) {
+omdb_search <- function(query, ...) {
     response <- httr::GET(
         omdb_api_url,
         query = list(
             apikey = Sys.getenv("OMDB_APIKEY"),
             s = query
-        )
+        ),
+        httr::timeout(2)
     )
     
-    cache_api_response(response)
+    save_api(response, ...)
 }
 
 #' Get detailed title information from OMDB
 #' 
 #' @export
-omdb_title <- function(imdb_id) {
+omdb_title <- function(imdb_id, ...) {
     response <- httr::GET(
         omdb_api_url,
         query = list(
@@ -27,5 +28,21 @@ omdb_title <- function(imdb_id) {
         )
     )
     
-    cache_api_response(response)
+    save_api(response, ...)
+}
+
+#' Get detailed season information from OMDB
+#' 
+#' @export
+omdb_season <- function(imdb_id, season, ...) {
+    response <- httr::GET(
+        omdb_api_url,
+        query = list(
+            apikey = Sys.getenv("OMDB_APIKEY"),
+            i = imdb_id,
+            Season = season
+        )
+    )
+    
+    save_api(response, ...)
 }

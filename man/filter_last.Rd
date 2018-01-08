@@ -4,7 +4,7 @@
 \alias{filter_last}
 \title{Shortcut for filtering the last record}
 \usage{
-filter_last(.data)
+filter_last(tbl)
 }
 \description{
 Shortcut for filtering the last record

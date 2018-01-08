@@ -3,11 +3,11 @@ putio_api_url <- "https://api.put.io"
 #' Get oauth token from putio user id
 #' 
 #' @export
-putio_get_token <- memoise::memoise(function(putio_user_id) {
-    user_id <- as.character(putio_user_id)
+putio_get_token <- memoise::memoise(function(user_id) {
+    user_id <- as.character(user_id)
     get_table("api") %>% 
         dplyr::filter(hostname == "api.put.io", path == "v2/account/info", 
-                      sql("response#>'{info,user_id}'") == !!user_id) %>% 
+                      sql("json #> '{info,user_id}'") == !!user_id) %>% 
         filter_last() %>% 
         lax_select("query->>'oauth_token'") %>% 
         dplyr::pull()
@@ -31,47 +31,37 @@ putio_oauth_redirect_url <- function(redirect_url = "http://busboy.io") {
 #' put.io account information
 #' 
 #' @export
-putio_account_info <- function(putio_user_id = NULL, 
-                               oauth_token = putio_get_token(putio_user_id)) {
+putio_account_info <- function(user_id = NULL, 
+                               oauth_token = putio_get_token(user_id)) {
     response <- httr::GET(
         putio_api_url,
         path = "v2/account/info",
         query = list(oauth_token = oauth_token)
     )
     
-    cache_api_response(response)
+    save_api(response)
 }
 
 #' Get information about a transfer
 #' 
 #' @export
-putio_get_transfer <- function(putio_user_id, putio_user_download_id,
-                               oauth_token = putio_get_token(putio_user_id)) {
+putio_get_transfer <- function(user_id, putio_user_download_id,
+                               oauth_token = putio_get_token(user_id)) {
     response <- httr::GET(
         putio_api_url,
         path = glue("v2/transfers/{putio_user_download_id}"),
         query = list(oauth_token = oauth_token)
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Add transfer to put.io
 #' 
 #' @export
-putio_add_transfer <- function(putio_user_id = NULL, source, save_parent_id = 0, 
-                               callback_uuid = NULL,
-                               oauth_token = putio_get_token(putio_user_id)) {
-    if (!is.null(callback_uuid)) {
-        callback_url <- paste0(
-            "https://sqs.us-east-1.amazonaws.com/", 
-            "575677476286/putio_transfer_complete",
-            "?Action=SendMessage&MessageBody=", callback_uuid
-        )
-    } else {
-        callback_url <- "http://example.com/placeholder"
-    }
-    
+putio_add_transfer <- function(user_id = NULL, source, save_parent_id = 0, 
+                               callback_url = NULL,
+                               oauth_token = putio_get_token(user_id)) {
     response <- httr::POST(
         putio_api_url,
         path = "v2/transfers/add",
@@ -83,14 +73,14 @@ putio_add_transfer <- function(putio_user_id = NULL, source, save_parent_id = 0,
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Get users files
 #' 
 #' @export
-putio_files_list <- function(putio_user_id = NULL, parent_id = 0,
-                             oauth_token = putio_get_token(putio_user_id)) {
+putio_files_list <- function(user_id = NULL, parent_id = 0,
+                             oauth_token = putio_get_token(user_id)) {
     response <- httr::GET(
         putio_api_url,
         path = "v2/files/list",
@@ -100,14 +90,14 @@ putio_files_list <- function(putio_user_id = NULL, parent_id = 0,
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Create folder on put.io
 #' 
 #' @export
-putio_create_folder <- function(putio_user_id = NULL, name, parent_id = 0,
-                                oauth_token = putio_get_token(putio_user_id)) {
+putio_create_folder <- function(user_id = NULL, name, parent_id = 0,
+                                oauth_token = putio_get_token(user_id)) {
     response <- httr::POST(
         putio_api_url,
         path = "v2/files/create-folder",
@@ -118,61 +108,61 @@ putio_create_folder <- function(putio_user_id = NULL, name, parent_id = 0,
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
     
 }
 
 #' Rename a file on put.io
 #' 
 #' @export
-putio_files_rename <- function(putio_user_id = NULL, user_file_id, new_name, 
-                               oauth_token = putio_get_token(putio_user_id)) {
+putio_files_rename <- function(user_id = NULL, file_id, new_name, 
+                               oauth_token = putio_get_token(user_id)) {
     response <- httr::POST(
         putio_api_url,
         path = "v2/files/rename",
         query = list(oauth_token = oauth_token),
         body = list(
-            file_id = as.character(user_file_id),
+            file_id = as.character(file_id),
             name = new_name
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Rename a file on put.io
 #' 
 #' @export
-putio_files_move <- function(putio_user_id = NULL, user_file_id, parent_id,
-                             oauth_token = putio_get_token(putio_user_id)) {
+putio_files_move <- function(user_id = NULL, file_id, parent_id,
+                             oauth_token = putio_get_token(user_id)) {
     response <- httr::POST(
         putio_api_url,
         path = "v2/files/move",
         query = list(oauth_token = oauth_token),
         body = list(
-            file_ids = paste(user_file_id, collapse = ","),
+            file_ids = paste(file_id, collapse = ","),
             parent_id = as.character(parent_id)
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Delete  a file on put.io
 #' 
 #' @export
-putio_files_delete <- function(putio_user_id = NULL, user_file_id, 
-                               oauth_token = putio_get_token(putio_user_id)) {
+putio_files_delete <- function(user_id = NULL, file_id, 
+                               oauth_token = putio_get_token(user_id)) {
     response <- httr::POST(
         putio_api_url,
         path = "v2/files/delete",
         query = list(oauth_token = oauth_token),
         body = list(
-            file_ids = paste(user_file_id, collapse = ",")
+            file_ids = paste(file_id, collapse = ",")
         )
     )
     
-    cache_api_response(response)
+    save_api(response, user_id)
 }
 
 #' Search put.io with from:admin
@@ -188,12 +178,12 @@ putio_search_admin <- function(query) {
         )
     )
 
-    cache_api_response(response)
+    save_api(response)
 }
 
 #' Link to users putio file
 #' 
 #' @export
-putio_file_link <- function(putio_user_file_id) {
-    glue("https://app.put.io/files/{putio_user_file_id}")
+putio_file_link <- function(file_id) {
+    glue("https://app.put.io/files/{file_id}")
 }

@@ -4,8 +4,8 @@
 \alias{putio_get_transfer}
 \title{Get information about a transfer}
 \usage{
-putio_get_transfer(putio_user_id, putio_user_download_id,
-  oauth_token = putio_get_token(putio_user_id))
+putio_get_transfer(user_id, putio_user_download_id,
+  oauth_token = putio_get_token(user_id))
 }
 \description{
 Get information about a transfer

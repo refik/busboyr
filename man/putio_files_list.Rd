@@ -4,8 +4,8 @@
 \alias{putio_files_list}
 \title{Get users files}
 \usage{
-putio_files_list(putio_user_id = NULL, parent_id = 0,
-  oauth_token = putio_get_token(putio_user_id))
+putio_files_list(user_id = NULL, parent_id = 0,
+  oauth_token = putio_get_token(user_id))
 }
 \description{
 Get users files

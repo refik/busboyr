@@ -4,7 +4,7 @@
 \alias{lax_select}
 \title{Select statement with no column name control}
 \usage{
-lax_select(.data, select_expr)
+lax_select(tbl, select_expr)
 }
 \description{
 Select statement with no column name control

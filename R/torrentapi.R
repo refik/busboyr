@@ -20,25 +20,18 @@ torrentapi_token <- memoise::memoise(function() {
 #' Search torrents with imdb id
 #' 
 #' @export
-torrentapi_imdb_search <- function(imdb_id, season = NULL, episode = NULL, 
-                                   season_pack_only = FALSE) {
+search_torrent <- function(title_id, season = NULL, ...) {
     logger <- get_logger()
     
     query <- list(
         token = torrentapi_token(),
         mode = "search",
-        search_imdb = imdb_id,
+        search_imdb = title_id,
         sort = "seeders",
         limit = 100
     )
     
-    if (!is.null(season)) {
-        search_string <- sprintf("S%02d", season)
-        if (!is.null(episode)) {
-            search_string <- sprintf("%sE%02d", search_string, episode)
-        }
-        query$search_string <- search_string
-    }
+    if (!is.null(season))  query$search_string <- sprintf("S%02i", season)
     
     response <- httr::RETRY(
         "GET",
@@ -47,23 +40,32 @@ torrentapi_imdb_search <- function(imdb_id, season = NULL, episode = NULL,
         query = query
     )
     
-    cached_response <- cache_api_response(response)
+    api <- save_api(response, ...)
     
-    if (!is.null(cached_response$json$error)) {
-        stop(cached_response$json$error)
+    if (!is.null(api$error)) {
+        logger(glue("Torrentapi error: {api$error}"))
+        torrents <- NULL
     } else {
-        torrents <- cached_response$json$torrent_results %>% 
-            dplyr::mutate(hash = stringr::str_extract(download, 
+        torrents <- api$torrent_results %>% 
+            dplyr::rename(name = "filename", source = "download") %>% 
+            dplyr::mutate(hash = stringr::str_extract(source, 
                                                       "(?<=urn:btih:)[0-9a-z]+"))
         
-        logger(glue("Search returned {nrow(torrents)} results"))
-        
-        if (is.null(episode) && !is.null(season) && season_pack_only == TRUE) {
-            season_pack_regex <- "[^A-Za-z0-9]S[0-9]{2}[^eE]"
-            torrents <- dplyr::filter(torrents, 
-                                      stringr::str_detect(filename, season_pack_regex))
+        if (!is.null(season)) {
+            logger("Adding season_pack and episode information.")
+            torrents <- dplyr::mutate(
+                torrents, 
+                season_pack = stringr::str_detect(name, "\\.S[0-9]{2}\\."), 
+                episode = extract_episode(name, !!season)
+            )
         }
+        
+        logger(glue("Search returned {nrow(torrents)} results"))
     }
     
-    torrents
+    dplyr::as_tibble(torrents) %>% 
+        dplyr::mutate(seeder_rank = row_number()) %>% 
+        bind_putio_download() %>% 
+        dplyr::mutate(full_hd = stringr::str_detect(name, "1080p"),
+                      hd = stringr::str_detect(name, "720p|HDTV"))
 }

@@ -65,7 +65,7 @@ title_search_card <- function(Title, Type, Year, imdbID, Poster, trigger_input, 
                             shiny::tags$button(
                                 type = "button",
                                 class = "btn btn-primary",
-                                "Get"
+                                "See"
                             ),
                             trigger_input_name = trigger_input,
                             trigger_input_value = imdbID,

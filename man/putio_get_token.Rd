@@ -4,7 +4,7 @@
 \alias{putio_get_token}
 \title{Get oauth token from putio user id}
 \usage{
-putio_get_token(putio_user_id)
+putio_get_token(user_id)
 }
 \description{
 Get oauth token from putio user id
