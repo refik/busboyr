@@ -20,7 +20,7 @@ consume_callback <- function(wait = NULL) {
         dplyr::pull(id)
     
     if (length(download_id) == 0) {
-        logger("download_id for uuid:{uuid} not found, skipping callback.")
+        logger(glue("download_id for uuid:{uuid} not found, skipping callback."))
     } else {
         create_task("create_file", list(download_id = download_id))
     }

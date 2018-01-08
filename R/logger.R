@@ -9,8 +9,13 @@ get_logger <- function(calling_fn_name = NULL, exclude_vars = character()) {
     calling_fn_args <- calling_fn_args %>% 
         purrr::discard(~ is.null(.) || is.na(.)) %>% # Discarding NULLs
         purrr::map_chr(function(arg_val) {
-            if (length(arg_val) > 1) glue("<vec({length(arg_val)})>")
-            else as.character(arg_val[[1]])
+            if (is.list(arg_val)) {
+                glue("<list({length(arg_val)})>")
+            } else if (length(arg_val) > 1) {
+                glue("<len({length(arg_val)})>")
+            } else {
+                as.character(arg_val[[1]])
+            }
         }) %>% 
         purrr::map_chr(function(arg_val) {
             if (nchar(arg_val) > 15) glue("<{strtrim(arg_val, 13)}>")
