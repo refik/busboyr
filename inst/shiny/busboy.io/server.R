@@ -11,4 +11,13 @@ function(input, output, session) {
     putio_user_id <- shiny::callModule(account, "account")
     selected_imdb_id <- shiny::callModule(search, "search", putio_user_id)
     shiny::callModule(title, "title", putio_user_id, selected_imdb_id)
+    
+    shiny::observe({
+        putio_user_id()
+        shiny::updateNavbarPage(
+            session, 
+            "busboy_navbar", 
+            "search"
+        )
+    })
 }

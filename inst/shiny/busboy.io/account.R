@@ -38,10 +38,10 @@ account <- function(input, output, session) {
         
         if (!is.null(token)) {
             shiny::updateQueryString("#")
-            
-            account_info <- busboyr::putio_account_info(oauth_token = "3ULDFGUT")
-            user_id <- account_info$json$info$user_id
-            plan_expiration <- account_info$json$info$plan_expiration_date %>% 
+
+            account_info <- busboyr::putio_account_info(oauth_token = token)$info
+            user_id <- account_info$user_id
+            plan_expiration <- account_info$plan_expiration_date %>% 
                 lubridate::ymd_hms()
             
             shiny::validate(
