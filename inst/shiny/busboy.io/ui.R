@@ -15,7 +15,7 @@ shiny::tagList(
     shinyjs::useShinyjs(),
     shiny::navbarPage(
         title = shiny::tags$img(src = "logo.png"), 
-        theme = "paper_theme.css", selected = "search", 
+        theme = "paper_theme.css", selected = "account", 
         id = "busboy_navbar", windowTitle = "Busboy", fluid = FALSE,
         shiny::tabPanel("Account", value = "account",
                         account_UI("account")),

@@ -8,6 +8,10 @@
     margin-bottom: 3em;
 }
 
+#session-debug {
+    margin-top: 2em;
+}
+
 /* Search module */
 #search {
     margin-top: 1em;

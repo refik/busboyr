@@ -53,11 +53,11 @@ account <- function(input, output, session) {
         } else if (!is.null(authenticated_session_uuid)) {
             cookie_time_constraint <- "NOW() at time zone 'utc' - INTERVAL '7 days'"
             
-            user_id <- dplyr::tbl(pool, "session") %>% 
+            user_id <- busboyr::get_table("session") %>% 
                 dplyr::filter(
-                    session_uuid == !!authenticated_session_uuid,
+                    uuid == !!authenticated_session_uuid,
                     created_at > sql(cookie_time_constraint)) %>% 
-                dplyr::pull(putio_user_id)
+                dplyr::pull(user_id)
             
             shiny::validate(
                 shiny::need(
@@ -82,11 +82,11 @@ account <- function(input, output, session) {
             user_agent <- session$request$HTTP_USER_AGENT
             if (is.null(user_agent)) user_agent <- NA_character_
             
-            session_uuid <- busboyr::insert_row(con, "session", list(
+            session_uuid <- busboyr::insert_row("session", list(
                 user_agent = user_agent,
                 ip_address = session$request$REMOTE_ADDR,
-                putio_user_id = user_id
-            ), returning = "session_uuid")
+                user_id = user_id
+            ), returning = "uuid", con = con)
             
             # If the user didn't authenticate using a cookie already, set it so that
             # it can be used for authentication later.
@@ -115,7 +115,7 @@ account <- function(input, output, session) {
                 # Write session end date when session ends
                 statement <- glue(
                     "UPDATE session SET ended_at = timezone('utc'::text, now()) 
-                     WHERE session_uuid = '{session_uuid}'")
+                     WHERE uuid = '{session_uuid}'")
                 DBI::dbExecute(pool, statement)
                 
                 # Close the sqs queue created for the session
@@ -127,7 +127,7 @@ account <- function(input, output, session) {
     })
     
     putio_user <- shiny::reactive({
-        busboyr::putio_cached_user(putio_user_id())
+        busboyr::get_user(putio_user_id())
     })
     
     shiny::observeEvent(input$logout, {
@@ -169,6 +169,10 @@ account <- function(input, output, session) {
             shiny::tags$span("For questions, email: "),
             shiny::tags$a(href = "mailto:info@busboy.io", "info@busboy.io")
         )
+    })
+    
+    output$debug <- shiny::renderPrint({
+        as.list(session$request)
     })
     
     putio_user_id
