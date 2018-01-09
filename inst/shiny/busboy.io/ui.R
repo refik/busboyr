@@ -21,7 +21,7 @@ shiny::tagList(
                         account_UI("account")),
         shiny::tabPanel("Search", value = "search",
                         search_UI("search")),
-        shiny::tabPanel("Title", value = "title",
+        shiny::tabPanel("Title Information", value = "title",
                         title_UI("title"))
     )
 )

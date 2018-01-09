@@ -9,20 +9,20 @@ title <- function(input, output, session, putio_user_id, selected_imdb_id) {
     })
 
     output$header <- shiny::renderUI({
-        page_header_title(imdb_title()$Title)
+        page_header_title(imdb_title()$name)
     })
     
     output$poster <- shiny::renderUI({
         shiny::tags$img(
-            src = imdb_title()$Poster,
+            src = imdb_title()$poster,
             class = "poster"
         )
     })
 
-    output$plot <- shiny::renderText(imdb_title()$Plot)
+    output$plot <- shiny::renderText(imdb_title()$plot)
     
     shiny::observe({
-        if (imdb_title()$Type == "series") {
+        if (imdb_title()$type == "series") {
             shinyjs::show(selector = "#season")
         }
     })

@@ -24,7 +24,7 @@ account_UI <- function(id) {
                     ),
                     shiny::column(
                         9,
-                        shiny::uiOutput(ns("putio_username"))
+                        shiny::uiOutput(ns("username"))
                     )
                 ),
                 shiny::fluidRow(
@@ -34,7 +34,7 @@ account_UI <- function(id) {
                     ),
                     shiny::column(
                         9,
-                        shiny::uiOutput(ns("putio_email"))
+                        shiny::uiOutput(ns("mail"))
                     )
                 ),
                 shiny::fluidRow(
@@ -44,7 +44,7 @@ account_UI <- function(id) {
                     ),
                     shiny::column(
                         9,
-                        shiny::uiOutput(ns("putio_disk_space"))
+                        shiny::uiOutput(ns("disk_space"))
                     )
                 ),
                 shiny::fluidRow(

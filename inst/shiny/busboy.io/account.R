@@ -23,7 +23,7 @@ account <- function(input, output, session) {
         }
     })
     
-    putio_user_id <- shiny::reactive({
+    user_id <- shiny::reactive({
         # Previous authenticated session uuid that could be used for authentication.
         # This is retrieved from cookie using js.
         authenticated_session_uuid <- input[[cookie_var]]
@@ -126,8 +126,8 @@ account <- function(input, output, session) {
         bit64::as.integer64(user_id)
     })
     
-    putio_user <- shiny::reactive({
-        busboyr::get_user(putio_user_id())
+    user <- shiny::reactive({
+        busboyr::get_user(user_id())
     })
     
     shiny::observeEvent(input$logout, {
@@ -145,7 +145,7 @@ account <- function(input, output, session) {
     
     shiny::observe({
         tryCatch(
-            putio_user_id(),
+            user_id(),
             error = function(e) {
                 shinyjs::show(selector = "#signin_with_putio")
                 stop(e)
@@ -156,15 +156,15 @@ account <- function(input, output, session) {
         shinyjs::show(selector = "#putio_user_information")
     })
 
-    output$putio_username <- shiny::renderText(putio_user()$username)
-    output$putio_email <- shiny::renderText(putio_user()$mail)
-    output$putio_disk_space <- shiny::renderText({
-        available <- utils:::format.object_size(putio_user()$disk$avail, "auto")
-        total <- utils:::format.object_size(putio_user()$disk$size, "auto")
+    output$username <- shiny::renderText(user()$username)
+    output$mail <- shiny::renderText(user()$mail)
+    output$disk_space <- shiny::renderText({
+        available <- utils:::format.object_size(user()$disk$avail, "auto")
+        total <- utils:::format.object_size(user()$disk$size, "auto")
         glue("{available} of {total} remaining")
     })
     
-    output$support_email <- shiny::renderUI({
+    output$support_mail <- shiny::renderUI({
         shiny::tagList(
             shiny::tags$span("For questions, email: "),
             shiny::tags$a(href = "mailto:info@busboy.io", "info@busboy.io")
@@ -175,5 +175,5 @@ account <- function(input, output, session) {
         as.list(session$request)
     })
     
-    putio_user_id
+    user_id
 }

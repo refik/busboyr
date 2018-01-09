@@ -11,8 +11,8 @@ season_UI <- function(id) {
     )
 }
 
-episode_line <- function(episode, name, duration, putio_user_file_id, status, ...) {
-    duration_friendly <- glue("{duration} MIN")
+episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
+    duration_friendly <- glue("{duration_minute} MIN")
     shiny::fluidRow(
         shiny::column(1, shiny::tags$span(class = "number", episode)),
         shiny::column(6, shiny::tags$span(class = "name", name)),
@@ -26,7 +26,7 @@ episode_line <- function(episode, name, duration, putio_user_file_id, status, ..
                         type = "button",
                         target = "_blank",
                         class = "btn btn-primary putio-file-link",
-                        href = busboyr::putio_file_link(putio_user_file_id),
+                        href = busboyr::putio_file_link(file_id),
                         shiny::tags$span(class = "glyphicon glyphicon-play")
                     )
                 },
@@ -45,7 +45,7 @@ season <- function(input, output, session, putio_user_id, selected_imdb_id) {
     refresh_season_episode <- reactive_trigger()
     
     output$seasons_tabset <- shiny::renderUI({
-        seasons <- busboyr::imdb_dataset_seasons(selected_imdb_id())
+        seasons <- busboyr::title_season(selected_imdb_id())
         tabset_id <- session$ns("seasons_tabset")
         tabset_fn <- purrr::partial(shiny::tabsetPanel, id = tabset_id)
 
@@ -80,8 +80,8 @@ season <- function(input, output, session, putio_user_id, selected_imdb_id) {
         # is complete
         input$refresh
         
-        episodes <- busboyr::title_status(putio_user_id(), selected_imdb_id(), 
-                                          selected_season()) %>% 
+        episodes <- busboyr::season_status(putio_user_id(), selected_imdb_id(), 
+                                           selected_season()) %>% 
             dplyr::collect()
         
         if (any(is.na(episodes$status))) {

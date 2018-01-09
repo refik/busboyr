@@ -35,7 +35,9 @@ get_title <- function(title_id) {
     }
     
     list(
+        id = api$imdbID,
         name = api$Title,
+        type = api$Type,
         year = api$Year,
         plot = api$Plot,
         poster = api$Poster

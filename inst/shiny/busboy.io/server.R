@@ -8,12 +8,12 @@ function(input, output, session) {
     max_session_time <- 10 * 60 * 1000 # 10 minutes
     shinyjs::runjs(glue("limit_session_time({max_session_time})"))
 
-    putio_user_id <- shiny::callModule(account, "account")
-    selected_imdb_id <- shiny::callModule(search, "search", putio_user_id)
-    shiny::callModule(title, "title", putio_user_id, selected_imdb_id)
+    user_id <- shiny::callModule(account, "account")
+    selected_imdb_id <- shiny::callModule(search, "search", user_id)
+    shiny::callModule(title, "title", user_id, selected_imdb_id)
     
     shiny::observe({
-        putio_user_id()
+        user_id()
         shiny::updateNavbarPage(
             session, 
             "busboy_navbar", 
