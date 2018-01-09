@@ -1,25 +1,27 @@
 #' Request a title to download
 #' 
 #' @export
-create_request <- function(user_id, title_id, prefer_hd = FALSE, 
+create_request <- function(user_id, title_id, prefer_full_hd = FALSE, 
                            season = NULL) {
     logger <- get_logger()
     
-    request_id <- insert_row(request, list(
-        user_id = user_id,
-        title_id = title_id,
-        prefer_hd = prefer_hd,
-        season = season
-    ), returning = "id")
-    
-    create_task("process_request", list(request_id = request_id))
+    pool::poolWithTransaction(db_pool(), function(con) {
+        request_id <- insert_row("request", list(
+            user_id = user_id,
+            title_id = title_id,
+            prefer_full_hd = prefer_full_hd,
+            season = season
+        ), returning = "id", con = con)
+        
+        create_task("process_request", list(request_id = request_id))
+    })
 }
 
 #' Download a torrent for a single title request
 #' 
 #' @export
 process_request <- function(request_id) {
-    logger <- get_logger()
+    logger <- get_logger("process_request")
     
     request <- get_record("request", request_id)
     logger(glue("Request from user:{request$user_id} for title:{request$title_id}"))
@@ -69,7 +71,8 @@ process_request <- function(request_id) {
     torrents %>% 
         dplyr::do(select_torrent(., request$prefer_full_hd)) %>% 
         dplyr::ungroup() %>% 
-        purrr::pmap(function(name, source, episode = NULL, ...) {
+        purrr::pmap(function(name, source, episode, ...) {
+            if (is.na(episode)) episode <- NULL
             start_download(request$user_id, request_id, name, source, 
                            request$title_id, season = request$season, 
                            episode = episode)

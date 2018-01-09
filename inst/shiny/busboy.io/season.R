@@ -2,10 +2,10 @@ season_UI <- function(id) {
     ns <- shiny::NS(id)
     shiny::tags$div(
         id = "season",
-        shiny::uiOutput(ns("seasons_tabset")),
-        shiny::uiOutput(ns("seasons_episode")),
+        shiny::uiOutput(ns("season_tab")),
+        shiny::uiOutput(ns("episode")),
         shinyjs::hidden(
-            shiny::actionButton(ns("download_season"), class = "add-season btn-primary", 
+            shiny::actionButton(ns("download"), class = "add-season btn-primary", 
                                 label = "Get Season")
         )
     )
@@ -21,7 +21,7 @@ episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
         shiny::column(
             3,
             switch(status,
-                ready = {
+                has_file = {
                     shiny::tags$a(
                         type = "button",
                         target = "_blank",
@@ -30,10 +30,10 @@ episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
                         shiny::tags$span(class = "glyphicon glyphicon-play")
                     )
                 },
-                requested = {
+                has_request = {
                     shiny::tags$span("Finding", class = "blink")
                 },
-                downloading = {
+                has_download = {
                     shiny::tags$span("In Transfers", class = "blink")
                 }
             )
@@ -41,12 +41,12 @@ episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
     )
 }
 
-season <- function(input, output, session, putio_user_id, selected_imdb_id) {
-    refresh_season_episode <- reactive_trigger()
+season <- function(input, output, session, user_id, title_id) {
+    refresh_episode <- reactive_trigger()
     
-    output$seasons_tabset <- shiny::renderUI({
-        seasons <- busboyr::title_season(selected_imdb_id())
-        tabset_id <- session$ns("seasons_tabset")
+    output$season_tab <- shiny::renderUI({
+        seasons <- busboyr::title_season(title_id())
+        tabset_id <- session$ns("season_tab")
         tabset_fn <- purrr::partial(shiny::tabsetPanel, id = tabset_id)
 
         tab_panels <- purrr::map(seasons, function(season) {
@@ -59,35 +59,29 @@ season <- function(input, output, session, putio_user_id, selected_imdb_id) {
         do.call(tabset_fn, tab_panels)
     })
     
-    selected_season <- shiny::reactive({
+    season <- shiny::reactive({
         shiny::validate(
-            shiny::need(input$seasons_tabset, message = "Finding seasons...")
+            shiny::need(input$season_tab, message = "Finding seasons...")
         )
-        as.integer(input$seasons_tabset)
+        as.integer(input$season_tab)
     })
     
-    refresh_channel <- shiny::reactive({
-        imdb_id <- imdb_id()
-        season <- season()
-        glue("{imdb_id} - season {season}")
-    })
-    
-    output$seasons_episode <- shiny::renderUI({
+    output$episode <- shiny::renderUI({
         # Binding refresh
-        refresh_season_episode$depend()
+        refresh_episode$depend()
 
         # This will be triggered from sqs when a download
         # is complete
         input$refresh
         
-        episodes <- busboyr::season_status(putio_user_id(), selected_imdb_id(), 
-                                           selected_season()) %>% 
+        episodes <- busboyr::season_status(user_id(), title_id(), 
+                                           season()) %>% 
             dplyr::collect()
         
         if (any(is.na(episodes$status))) {
-            shinyjs::show("download_season")
+            shinyjs::show("download")
         } else {
-            shinyjs::hide("download_season")
+            shinyjs::hide("download")
         }
         
         episodes %>% 
@@ -95,17 +89,14 @@ season <- function(input, output, session, putio_user_id, selected_imdb_id) {
             purrr::pmap(episode_line)
     })
     
-    shiny::observeEvent(input$download_season, {
-        season_request_id <- busboyr::request_season(
-            shiny::isolate(putio_user_id()), 
-            shiny::isolate(selected_imdb_id()), 
-            shiny::isolate(selected_season()))
+    shiny::observeEvent(input$download, {
+        busboyr::create_request(
+            shiny::isolate(user_id()), 
+            shiny::isolate(title_id()), 
+            season = shiny::isolate(season())
+        )
         
         # Refreshing episodes to display the status update
-        refresh_season_episode$trigger()
-        
-        busboyr::task_create("process_season_request", list(
-            season_request_id = season_request_id
-        ))
+        refresh_episode$trigger()
     })
 }

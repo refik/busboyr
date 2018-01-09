@@ -19,3 +19,19 @@ extract_episode <- function(name, season) {
     episode_regex <- glue("(?<=[Ss]{sprintf('%02i', season)}[Ee])[0-9]{{2}}")
     as.integer(stringr::str_extract(name, episode_regex))
 }
+
+#' Evaluate an expression
+#' 
+#' @export
+eval_expression <- function(expression) {
+    logger <- get_logger()
+    
+    result <- expression %>% 
+        parse(text = .) %>% 
+        eval()
+    
+    utils::capture.output(print(result)) %>% 
+        paste(collapse = "\n") %>% 
+        paste0("\n", .) %>% 
+        logger()
+}

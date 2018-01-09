@@ -5,7 +5,7 @@
 \title{Start a download for a title}
 \usage{
 start_download(user_id, request_id, name, source, title_id, season = NULL,
-  episode = NULL, season_pack = FALSE)
+  episode = NULL)
 }
 \description{
 Start a download for a title

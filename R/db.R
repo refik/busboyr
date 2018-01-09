@@ -30,7 +30,7 @@ insert_row <- function(table, values, returning = NULL, con = NULL) {
     }
     
     # Discarding NULL values. They can't be inserted.
-    values <- purrr::discard(values, is.null)
+    values <- purrr::discard(values, ~is.null(.) || is.na(.))
 
     if (!is.null(returning)) {
         returning_statement <- glue("RETURNING {returning}")

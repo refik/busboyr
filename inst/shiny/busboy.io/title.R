@@ -1,33 +1,33 @@
-title <- function(input, output, session, putio_user_id, selected_imdb_id) {
-    imdb_title <- shiny::reactive({
+title <- function(input, output, session, user_id, title_id) {
+    title <- shiny::reactive({
         shiny::validate(
-            shiny::need(selected_imdb_id(), 
+            shiny::need(title_id(), 
                         message = "Please search and select a title first.")
         )
         
-        busboyr::get_title(selected_imdb_id())
+        busboyr::get_title(title_id())
     })
 
     output$header <- shiny::renderUI({
-        page_header_title(imdb_title()$name)
+        page_header_title(title()$name)
     })
     
     output$poster <- shiny::renderUI({
         shiny::tags$img(
-            src = imdb_title()$poster,
+            src = title()$poster,
             class = "poster"
         )
     })
 
-    output$plot <- shiny::renderText(imdb_title()$plot)
+    output$plot <- shiny::renderText(title()$plot)
     
     shiny::observe({
-        if (imdb_title()$type == "series") {
-            shinyjs::show(selector = "#season")
+        if (title()$type == "series") {
+            shinyjs::show(selector = "#title_season")
         }
     })
     
-    shiny::callModule(season, "season", putio_user_id, selected_imdb_id)
+    shiny::callModule(season, "season", user_id, title_id)
 }
 
 title_UI <- function(id) {
@@ -53,7 +53,7 @@ title_UI <- function(id) {
                     shiny::column(
                         12,
                         shinyjs::hidden(
-                            shiny::tags$div(id = "season",
+                            shiny::tags$div(id = "title_season",
                                             season_UI(ns("season")))
                         )
                     )

@@ -30,12 +30,12 @@ search <- function(input, output, session, user_id) {
         titles <- head(search_result(), 8)
         
         title_cards <- purrr::pmap(titles, title_search_card, 
-                                   trigger_input = session$ns("selected_imdb_id"))
+                                   trigger_input = session$ns("title_id"))
         
         do.call(shiny::fluidRow, title_cards)
     })
     
-    shiny::reactive(input$selected_imdb_id)
+    shiny::reactive(input$title_id)
 }
 
 title_search_card <- function(name, type, year, id, poster, trigger_input, ...) {

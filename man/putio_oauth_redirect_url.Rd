@@ -4,7 +4,7 @@
 \alias{putio_oauth_redirect_url}
 \title{put.io auth url for busboy}
 \usage{
-putio_oauth_redirect_url(redirect_url = "http://busboy.io")
+putio_oauth_redirect_url(redirect_url = NULL)
 }
 \description{
 put.io auth url for busboy

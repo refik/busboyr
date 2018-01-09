@@ -4,17 +4,24 @@ torrentapi_url <- "https://torrentapi.org"
 #' 
 #' @export
 torrentapi_token <- memoise::memoise(function() {
-    response <- httr::GET(
+    logger <- get_logger("torrentapi_token")
+    
+    response <- httr::RETRY(
+        "GET",
         torrentapi_url, 
         path = "pubapi_v2.php",
-        query = list(get_token = "get_token")
+        query = list(get_token = "get_token"),
+        times = 5
     )
+    
+    token <- httr::content(response, "parsed")$token
+    logger(glue("Got token:", "{token}"))
     
     # There is a 1req/2sec limit and the first time this function is called,
     # the next call definitly fails without sleep.
     Sys.sleep(2)
-    
-    httr::content(response, "parsed")$token
+
+    token
 }, ~memoise::timeout(15 * 60)) # tokens expire in 15 minutes
 
 #' Search torrents with imdb id
@@ -37,32 +44,33 @@ search_torrent <- function(title_id, season = NULL, ...) {
         "GET",
         torrentapi_url,
         path = "pubapi_v2.php",
-        query = query
+        query = query,
+        times = 5
     )
     
     api <- save_api(response, ...)
     
     if (!is.null(api$error)) {
         logger(glue("Torrentapi error: {api$error}"))
-        torrents <- NULL
-    } else {
-        torrents <- api$torrent_results %>% 
-            dplyr::rename(name = "filename", source = "download") %>% 
-            dplyr::mutate(hash = stringr::str_extract(source, 
-                                                      "(?<=urn:btih:)[0-9a-z]+"))
-        
-        if (!is.null(season)) {
-            logger("Adding season_pack and episode information.")
-            torrents <- dplyr::mutate(
-                torrents, 
-                season_pack = stringr::str_detect(name, "\\.S[0-9]{2}\\."), 
-                episode = extract_episode(name, !!season)
-            )
-        }
-        
-        logger(glue("Search returned {nrow(torrents)} results"))
+        return(NULL)
     }
     
+    torrents <- api$torrent_results %>% 
+        dplyr::rename(name = "filename", source = "download") %>% 
+        dplyr::mutate(hash = stringr::str_extract(source, 
+                                                  "(?<=urn:btih:)[0-9a-z]+"))
+    
+    if (!is.null(season)) {
+        logger("Adding season_pack and episode information.")
+        torrents <- dplyr::mutate(
+            torrents, 
+            season_pack = stringr::str_detect(name, "\\.S[0-9]{2}\\."), 
+            episode = extract_episode(name, !!season)
+        )
+    }
+    
+    logger(glue("Search returned {nrow(torrents)} results"))
+
     dplyr::as_tibble(torrents) %>% 
         dplyr::mutate(seeder_rank = row_number()) %>% 
         bind_putio_download() %>% 
