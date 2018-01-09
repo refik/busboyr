@@ -24,7 +24,7 @@ extract_episode <- function(name, season) {
 #' 
 #' @export
 eval_expression <- function(expression) {
-    logger <- get_logger()
+    logger <- get_logger("eval_expression")
     
     result <- expression %>% 
         parse(text = .) %>% 
