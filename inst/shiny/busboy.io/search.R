@@ -3,18 +3,32 @@ search <- function(input, output, session, user_id) {
     # search query box
     query_input <- session$ns("query")
     button_input <- session$ns("button")
-    shinyjs::runjs(glue("setup_search_query('{query_input}', '{button_input}')"))
+    shinyjs::runjs(glue("setup_search_bar('{query_input}', '{button_input}')"))
     
-    search_result <- shiny::eventReactive(input$button, {
+    search_result <- shiny::reactive({
+        # Attach reactive button event
+        input$button
+        
         # Making sure putio_user_id is obtainable
         user_id()
         
+        # Getting search query
+        query <- shiny::isolate(input$query)
+        
+        # If it is NULL, look for the query string
+        if (is.null(query)) {
+            query <- shiny::getQueryString()$query
+        }
+        
         shiny::validate(
-            shiny::need(input$query, 
+            shiny::need(query, 
                         message = "Please enter a title name to search")
         )
         
-        result <- busboyr::search_title(input$query)
+        # This is only necessary for query string
+        query <- stringr::str_replace_all(query, "\\+", " ")
+        
+        result <- busboyr::search_title(query)
         
         shiny::validate(
             shiny::need(!is.null(result), message = "Couldn't find any title.")
@@ -22,7 +36,8 @@ search <- function(input, output, session, user_id) {
         
         result %>% 
             # Decreasing the size of posters for search results
-            dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150"))
+            dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150")) %>% 
+            dplyr::filter(!is.na(poster))
     })
     
     output$result <- shiny::renderUI({
@@ -30,24 +45,43 @@ search <- function(input, output, session, user_id) {
         titles <- head(search_result(), 8)
         
         title_cards <- purrr::pmap(titles, title_search_card, 
-                                   trigger_input = session$ns("title_id"))
+                                   input_name = session$ns("title_id"))
         
         do.call(shiny::fluidRow, title_cards)
     })
     
-    shiny::reactive(input$title_id)
+    title_id <- shiny::reactive({
+        title_id <- input$title_id
+        
+        if (is.null(title_id)) {
+            title_id <- shiny::getQueryString()$id
+        }
+        
+        shiny::validate(
+            shiny::need(title_id, 
+                        message = "Please search and select a title first.")
+        )
+        
+        as.integer(title_id)
+    })
+    
+    list(
+        title_id = title_id,
+        query = shiny::reactive({
+            search_result()
+            input$query
+        })
+    )
 }
 
-title_search_card <- function(name, type, year, id, poster, trigger_input, ...) {
+title_search_card <- function(name, type, year, id, poster, input_name, ...) {
     extended_column(
         middle_col = 3, 0, small_col = 6, 0,
         shiny::div(
             class = "thumbnail",
             shiny::div(
                 class = "poster-background",
-                if (poster != "N/A") {
-                    shiny::img(src = poster, class = "poster")
-                }
+                shiny::img(src = poster, class = "poster")
             ),
             shiny::div(
                 class = "caption",
@@ -61,15 +95,14 @@ title_search_card <- function(name, type, year, id, poster, trigger_input, ...) 
                     ),
                     shiny::column(
                         5,
-                        make_event_button(
+                        make_input_button(
                             shiny::tags$button(
                                 type = "button",
                                 class = "btn btn-primary",
                                 "See"
                             ),
-                            trigger_input_name = trigger_input,
-                            trigger_input_value = id,
-                            tab_name = "title"
+                            input_name = input_name,
+                            input_value = id
                         )
                     )
                 )
@@ -78,14 +111,16 @@ title_search_card <- function(name, type, year, id, poster, trigger_input, ...) 
     )
 }
 
-search_UI <- function(id) {
+search_UI <- function(id, query) {
     ns <- shiny::NS(id)
     
-    shiny::tagList(
+    shiny::tags$div(
+        id = "search",
         shiny::fluidRow(
+            class = "bar",
             extended_column(
                 middle_col = 5, 3, small_col = 6, 2,
-                shiny::textInput(ns("query"), NULL, width = "100%", 
+                shiny::textInput(ns("query"), label = NULL, value = query, width = "100%", 
                                  placeholder = "Search for a title")
             ),
             
@@ -101,7 +136,7 @@ search_UI <- function(id) {
         ),
         
         shiny::tags$div(
-            id = "search",
+            class = "result",
             shiny::uiOutput(ns("result"))
         )
     )

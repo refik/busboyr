@@ -19,13 +19,14 @@ omdb_search <- function(query, ...) {
 #' Get detailed title information from OMDB
 #' 
 #' @export
-omdb_title <- function(imdb_id, ...) {
+omdb_title <- function(title_id, ...) {
     response <- httr::GET(
         omdb_api_url,
         query = list(
             apikey = Sys.getenv("OMDB_APIKEY"),
-            i = imdb_id
-        )
+            i = to_imdb(title_id)
+        ),
+        httr::timeout(2)
     )
     
     save_api(response, ...)
@@ -34,12 +35,12 @@ omdb_title <- function(imdb_id, ...) {
 #' Get detailed season information from OMDB
 #' 
 #' @export
-omdb_season <- function(imdb_id, season, ...) {
+omdb_season <- function(title_id, season, ...) {
     response <- httr::GET(
         omdb_api_url,
         query = list(
             apikey = Sys.getenv("OMDB_APIKEY"),
-            i = imdb_id,
+            i = to_imdb(title_id),
             Season = season
         )
     )

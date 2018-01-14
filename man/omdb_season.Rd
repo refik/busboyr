@@ -4,7 +4,7 @@
 \alias{omdb_season}
 \title{Get detailed season information from OMDB}
 \usage{
-omdb_season(imdb_id, season, ...)
+omdb_season(title_id, season, ...)
 }
 \description{
 Get detailed season information from OMDB

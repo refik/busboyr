@@ -27,7 +27,8 @@ title_season <- memoise::memoise(function(title_id) {
 #' @export
 get_title <- function(title_id) {
     api <- get_table("api") %>% 
-        dplyr::filter(hostname == "www.omdbapi.com", sql("query ->> 'i'") == title_id) %>% 
+        dplyr::filter(hostname == "www.omdbapi.com", 
+                      sql("query ->> 'i'") == !!to_imdb(title_id)) %>% 
         last_saved_json()
     
     if (is.null(api)) {
@@ -35,12 +36,12 @@ get_title <- function(title_id) {
     }
     
     list(
-        id = api$imdbID,
+        id = title_id,
         name = api$Title,
         type = api$Type,
         year = api$Year,
         plot = api$Plot,
-        poster = api$Poster
+        poster = ifelse(api$Poster == "N/A", NA_character_, api$Poster)
     )
 }
 
@@ -68,7 +69,11 @@ search_title <- function(name) {
         logger(glue("Found {nrow(api$Search)} results."))
         api$Search %>% 
             dplyr::select(id = "imdbID", name = "Title",  type = "Type", 
-                          year = "Year", poster = "Poster") %>% 
+                          year = "Year", poster = "Poster") %>%
+            dplyr::mutate(id = from_imdb(id),
+                          year = as.integer(substr(year, 0, 4)),
+                          poster = ifelse(poster == "N/A", NA_character_, poster)) %>% 
+            dplyr::filter(type %in% c("movie", "series")) %>% 
             dplyr::as_tibble()
     }
 
@@ -85,11 +90,11 @@ title_status <- function(user_id, title_id) {
         filter_last() %>% 
         dplyr::pull(id)
     
-    has_download <- get_table("download", con = con) %>% 
+    has_download <- get_table("download") %>% 
         dplyr::filter(user_id == !!user_id, title_id == !!title_id) %>%
         pull_count() > 0 
     
-    has_request <- get_table("request", con = con) %>% 
+    has_request <- get_table("request") %>% 
         dplyr::filter(user_id == !!user_id, title_id == !!title_id) %>% 
         pull_count() > 0
     
@@ -100,7 +105,7 @@ title_status <- function(user_id, title_id) {
     } else if (has_request == TRUE) {
         status <- "has_request"
     } else {
-        status <- NULL
+        status <- NA_character_
     }
     
     list(

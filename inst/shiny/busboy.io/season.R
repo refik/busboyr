@@ -5,7 +5,7 @@ season_UI <- function(id) {
         shiny::uiOutput(ns("season_tab")),
         shiny::uiOutput(ns("episode")),
         shinyjs::hidden(
-            shiny::actionButton(ns("download"), class = "add-season btn-primary", 
+            shiny::actionButton(ns("download"), class = "get-season btn-primary", 
                                 label = "Get Season")
         )
     )
@@ -47,7 +47,9 @@ season <- function(input, output, session, user_id, title_id) {
     output$season_tab <- shiny::renderUI({
         seasons <- busboyr::title_season(title_id())
         tabset_id <- session$ns("season_tab")
-        tabset_fn <- purrr::partial(shiny::tabsetPanel, id = tabset_id)
+        message(shiny::getQueryString()$season)
+        tabset_fn <- purrr::partial(shiny::tabsetPanel, id = tabset_id, 
+                                    selected = shiny::getQueryString()$season)
 
         tab_panels <- purrr::map(seasons, function(season) {
             shiny::tabPanel(
@@ -60,10 +62,13 @@ season <- function(input, output, session, user_id, title_id) {
     })
     
     season <- shiny::reactive({
+        season <- input$season_tab
+        
         shiny::validate(
-            shiny::need(input$season_tab, message = "Finding seasons...")
+            shiny::need(season, message = "Finding seasons...")
         )
-        as.integer(input$season_tab)
+        
+        as.integer(season)
     })
     
     output$episode <- shiny::renderUI({
@@ -99,4 +104,6 @@ season <- function(input, output, session, user_id, title_id) {
         # Refreshing episodes to display the status update
         refresh_episode$trigger()
     })
+    
+    season
 }

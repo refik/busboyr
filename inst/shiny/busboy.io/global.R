@@ -10,11 +10,7 @@ source("season.R")
 # Utility
 source("util.R")
 source("util-ui.R")
-source("event-button.R")
 
 # Shortcuts for most used functions
 glue <- glue::glue
 `%>%` <- dplyr::`%>%`
-
-# Setting up database pool
-pool <- busboyr::db_pool()

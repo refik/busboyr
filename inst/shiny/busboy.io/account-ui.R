@@ -58,10 +58,6 @@ account_UI <- function(id) {
                     shiny::uiOutput(ns("support_email"))
                 )
             )
-        ),
-        shiny::tags$div(
-            id = "session-debug",
-            shiny::verbatimTextOutput(ns("debug"))
         )
     )
 }

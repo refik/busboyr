@@ -81,9 +81,13 @@ lax_select <- function(tbl, select_expr) {
 #' 
 #' @export
 get_record <- memoise::memoise(function(table, record_id, ...) {
-    get_table(table, ...) %>% 
+    record <- get_table(table, ...) %>% 
         dplyr::filter(id == !!record_id) %>% 
-        dplyr::collect() %>% 
+        dplyr::collect()
+    
+    assert_that(nrow(record) == 1, msg = "Record not found.")
+    
+    record %>% 
         purrr::modify_if(is.na, ~NULL) %>% 
         as.list()
 })

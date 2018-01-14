@@ -15,6 +15,7 @@ torrentapi_token <- memoise::memoise(function() {
     )
     
     token <- httr::content(response, "parsed")$token
+    assert_that(!is.null(token), msg = "Got NULL token from torrentapi")
     logger(glue("Got token:", "{token}"))
     
     # There is a 1req/2sec limit and the first time this function is called,
@@ -33,13 +34,13 @@ search_torrent <- function(title_id, season = NULL, ...) {
     query <- list(
         token = torrentapi_token(),
         mode = "search",
-        search_imdb = title_id,
+        search_imdb = to_imdb(title_id),
         sort = "seeders",
         limit = 100
     )
     
     if (!is.null(season))  query$search_string <- sprintf("S%02i", season)
-    
+        
     response <- httr::RETRY(
         "GET",
         torrentapi_url,

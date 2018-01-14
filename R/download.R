@@ -5,7 +5,7 @@ start_download <- function(user_id, request_id, name, source,
                            title_id, season = NULL, episode = NULL) {
     logger <- get_logger()
     
-    pool::poolWithTransaction(db_pool(), function(con) {
+    id <- pool::poolWithTransaction(db_pool(), function(con) {
         parent_id <- get_folder(user_id, "buffer")
         uuid <- uuid::UUIDgenerate()
         api <- putio_add_transfer(user_id, source = source, save_parent_id = parent_id, 
@@ -26,5 +26,9 @@ start_download <- function(user_id, request_id, name, source,
         logger(glue("Created download {id}"))
         id
     })
+    
+    refresh_shiny(user_id)
+    
+    id
 }
 

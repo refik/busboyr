@@ -4,7 +4,7 @@
 \alias{omdb_title}
 \title{Get detailed title information from OMDB}
 \usage{
-omdb_title(imdb_id, ...)
+omdb_title(title_id, ...)
 }
 \description{
 Get detailed title information from OMDB

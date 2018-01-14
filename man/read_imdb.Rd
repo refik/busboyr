@@ -4,7 +4,7 @@
 \alias{read_imdb}
 \title{Read imdb dataset file}
 \usage{
-read_imdb(type = c("episode", "basics"), file_name)
+read_imdb(type = c("episode", "basics"), file_name, ...)
 }
 \description{
 Couldn't solve some weird quoting error and wrote this custom tsv

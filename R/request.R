@@ -1,15 +1,13 @@
 #' Request a title to download
 #' 
 #' @export
-create_request <- function(user_id, title_id, prefer_full_hd = FALSE, 
-                           season = NULL) {
+create_request <- function(user_id, title_id, season = NULL) {
     logger <- get_logger()
     
     pool::poolWithTransaction(db_pool(), function(con) {
         request_id <- insert_row("request", list(
             user_id = user_id,
             title_id = title_id,
-            prefer_full_hd = prefer_full_hd,
             season = season
         ), returning = "id", con = con)
         
@@ -35,12 +33,31 @@ process_request <- function(request_id) {
     if (!is.null(request$season)) {
         logger(glue("Request is for season:{request$season}. Checking season_pack."))
         
+        torrents %>% 
+            dplyr::filter(season_pack == TRUE, on_putio == TRUE)
+        
         if (any(torrents$season_pack)) {
-            season_pack_preferable <- dplyr::filter(torrents, season_pack == TRUE) %>% 
-                dplyr::summarise(min(seeder_rank)) %>% 
-                # Arbitrary number. If its too far down at seeders, its probably
-                # something else.
-                dplyr::pull() < 5 
+            logger("Season packs found in torrents.")
+            
+            # Only take good quality ones into consideration. Low seeder rank could
+            # mean it is something else
+            good_season_pack <- dplyr::filter(torrents, season_pack == TRUE) %>% 
+                dplyr::filter(seeder_rank < 5)
+            
+            pack_on_putio <- any(good_season_pack$on_putio)
+            non_pack_on_putio <- dplyr::filter(torrents, season_pack == FALSE,
+                                               on_putio == TRUE) %>% 
+                nrow() > 0
+            
+            logger(glue(
+                "Good season pack on putio: {pack_on_putio}, ",
+                "Non season pack on putio: {non_pack_on_putio}, ",
+                "Number of quality season packs: {nrow(good_season_pack)}"
+            ))
+            
+            season_pack_preferable <- 
+                (pack_on_putio) ||
+                (non_pack_on_putio == FALSE && nrow(good_season_pack) > 0)
         } else {
             season_pack_preferable <- FALSE
         }
@@ -68,11 +85,12 @@ process_request <- function(request_id) {
         }
     }
     
+    prefer_full_hd <- get_full_hd(request$user_id, request$title_id)
+    
     torrents %>% 
-        dplyr::do(select_torrent(., request$prefer_full_hd)) %>% 
+        dplyr::do(select_torrent(., prefer_full_hd)) %>% 
         dplyr::ungroup() %>% 
-        purrr::pmap(function(name, source, episode, ...) {
-            if (is.na(episode)) episode <- NULL
+        purrr::pmap(function(name, source, episode = NULL, ...) {
             start_download(request$user_id, request_id, name, source, 
                            request$title_id, season = request$season, 
                            episode = episode)

@@ -2,22 +2,56 @@ function(input, output, session) {
     session$userData$reactive <- shiny::reactiveValues()
     session$userData$refresh <- shiny::reactiveValues()
     
-    event_button_setup(input, output, session, navbar_id = "busboy_navbar")
+    shinyjs::runjs("setup_input_button()")
     
-    # Close window after n minutes to prevent resource hogging
-    max_session_time <- 10 * 60 * 1000 # 10 minutes
-    shinyjs::runjs(glue("limit_session_time({max_session_time})"))
+    # Limit session time to 10 minutes
+    # shiny::reactiveTimer(10 * 60* 1000, )
 
+    # Return values from modules
     user_id <- shiny::callModule(account, "account")
-    selected_imdb_id <- shiny::callModule(search, "search", user_id)
-    shiny::callModule(title, "title", user_id, selected_imdb_id)
+    search <- shiny::callModule(search, "search", user_id)
+    title_id <- search$title_id
+    search_query <- search$query
+    season <- shiny::callModule(title, "title", user_id, title_id)
     
-    shiny::observe({
-        user_id()
+    navigate <- function(tab_value) {
         shiny::updateNavbarPage(
             session, 
-            "busboy_navbar", 
-            "search"
+            "navbar", 
+            tab_value
         )
+    }
+    
+    # If there is a change in title_id, navigate to title page
+    shiny::observe({
+        title_id()
+        navigate("title")
     })
+    
+    # If navbar is clicked and the page is changed, push the change to history and
+    # add it as a query string
+    shiny::observe({
+        qs_list <- list(page = input$navbar)
+
+        switch(input$navbar,
+            search = {
+                try(silent = TRUE, {
+                    qs_list$query <- search_query() %>% 
+                        stringr::str_replace_all(" ", "+")
+                })
+            },
+            title = {
+                try(silent = TRUE, {
+                    qs_list$id <- title_id()
+                })
+                
+                try(silent = TRUE, {
+                    qs_list$season <- season()
+                })
+            }
+        )
+
+        shiny::updateQueryString(build_qs(qs_list), mode = "replace")
+    })
+
 }

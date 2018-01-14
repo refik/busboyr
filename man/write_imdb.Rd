@@ -4,7 +4,7 @@
 \alias{write_imdb}
 \title{Write imdb dataset to db}
 \usage{
-write_imdb(episode_file = NULL, basics_file = NULL)
+write_imdb(episode_file = NULL, basics_file = NULL, ...)
 }
 \description{
 Write imdb dataset to db

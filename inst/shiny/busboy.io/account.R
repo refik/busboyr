@@ -76,7 +76,7 @@ account <- function(input, output, session) {
             )
         )
         
-        pool::poolWithTransaction(pool, function(con) {
+        pool::poolWithTransaction(busboyr::db_pool(), function(con) {
             # For some reason, user agent is not available in shiny server. Taking this
             # precaution to prevent an error in insert_row.
             user_agent <- session$request$HTTP_USER_AGENT
@@ -116,7 +116,7 @@ account <- function(input, output, session) {
                 statement <- glue(
                     "UPDATE session SET ended_at = timezone('utc'::text, now()) 
                      WHERE uuid = '{session_uuid}'")
-                DBI::dbExecute(pool, statement)
+                DBI::dbExecute(busboyr::db_pool(), statement)
                 
                 # Close the sqs queue created for the session
                 aws.sqs::delete_queue(sqs_name)
@@ -160,7 +160,8 @@ account <- function(input, output, session) {
     output$mail <- shiny::renderText(user()$mail)
     output$disk_space <- shiny::renderText({
         available <- utils:::format.object_size(user()$disk$avail, "auto")
-        total <- utils:::format.object_size(user()$disk$size, "auto")
+        total <- utils:::format.object_size(user()$disk$size, 
+                                            units = "auto", standard = "SI")
         glue("{available} of {total} remaining")
     })
     
@@ -170,10 +171,6 @@ account <- function(input, output, session) {
             shiny::tags$a(href = "mailto:info@busboy.io", "info@busboy.io")
         )
     })
-    
-    output$debug <- shiny::renderPrint({
-        as.list(session$request)
-    })
-    
+
     user_id
 }

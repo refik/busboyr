@@ -29,3 +29,19 @@ reactive_trigger <- function() {
     )
 }
 
+# Build a query string form list ?page=search&query=breaking
+build_qs <- function(qs_list) {
+    paste0("?", paste(names(qs_list), qs_list, sep = "=", collapse = "&"))
+}
+
+# Update query string with a single parameter
+update_qs <- function(param, value) {
+    qs_list <- shiny::getQueryString()
+    qs_param <- qs_list[[param]]
+    redundant <- !is.null(qs_param) && qs_param == value
+    
+    if (!redundant) {
+        qs_list[[param]] <- value
+        shiny::updateQueryString(build_qs(qs_list))
+    }
+}

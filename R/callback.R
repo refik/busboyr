@@ -1,4 +1,8 @@
-callback_queue_name <- "putio_transfer_complete"
+if (Sys.getenv("BUSBOY_ENV") == "LOCAL") {
+    callback_queue_name <- "callback_local"
+} else {
+    callback_queue_name <- "callback"
+}
 
 #' Consumes transfer complete tasks from putio
 #' 

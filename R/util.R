@@ -15,7 +15,6 @@ now_short <- function() paste0(format(Sys.time(), format = "%M:%OS1"))
 #' 
 #' @export
 extract_episode <- function(name, season) {
-    if (is.null(season)) return(rep(NA_integer_, length(name)))
     episode_regex <- glue("(?<=[Ss]{sprintf('%02i', season)}[Ee])[0-9]{{2}}")
     as.integer(stringr::str_extract(name, episode_regex))
 }
@@ -34,4 +33,19 @@ eval_expression <- function(expression) {
         paste(collapse = "\n") %>% 
         paste0("\n", .) %>% 
         logger()
+}
+
+#' Number to imdb id text
+#' 
+#' @export
+to_imdb <- function(title_id) {
+    sprintf("tt%07i", title_id)
+}
+
+
+#' Imdb text id to number
+#' 
+#' @export
+from_imdb <- function(title_id) {
+    as.integer(substr(title_id, 3, 9))
 }

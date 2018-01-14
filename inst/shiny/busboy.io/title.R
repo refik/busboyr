@@ -1,11 +1,21 @@
 title <- function(input, output, session, user_id, title_id) {
     title <- shiny::reactive({
-        shiny::validate(
-            shiny::need(title_id(), 
-                        message = "Please search and select a title first.")
-        )
+        title <- busboyr::get_title(title_id())
+        prefer_full_hd <- busboyr::get_full_hd(user_id(), title_id())
+        shiny::updateCheckboxInput(session, "prefer_full_hd",
+                                   value = prefer_full_hd)
+        title
+    })
+    
+    shiny::observeEvent(input$prefer_full_hd, {
+        user_id <- shiny::isolate(user_id())
+        title_id <- shiny::isolate(title_id())
         
-        busboyr::get_title(title_id())
+        if (input$prefer_full_hd == TRUE) {
+            busboyr::set_full_hd(user_id, title_id)
+        } else {
+            busboyr::unset_full_hd(user_id, title_id)
+        }
     })
 
     output$header <- shiny::renderUI({
@@ -19,20 +29,67 @@ title <- function(input, output, session, user_id, title_id) {
         )
     })
 
+    refresh_status <- reactive_trigger()
+    
+    output$button <- shiny::renderUI({
+        title <- busboyr::title_status(user_id(), title_id())
+        refresh_status$depend()
+
+        switch(title$status,
+            has_request = shiny::tags$span("Finding", class = "blink"),
+            has_download = shiny::tags$span("In Transfers", class = "blink"),
+            has_file = shiny::tags$a(
+                type = "button",
+                target = "_blank",
+                class = "btn btn-primary",
+                href = busboyr::putio_file_link(title$file_id),
+                shiny::tags$span(class = "glyphicon glyphicon-play")
+            ),
+            
+            # The default is the download button
+            shiny::actionButton(session$ns("download"), 
+                                class = "btn-primary get-movie", 
+                                label = "Get Movie")
+        )
+    })
+    
+    shiny::observeEvent(input$download, {
+        busboyr::create_request(
+            shiny::isolate(user_id()), 
+            shiny::isolate(title_id())
+        )
+        
+        refresh_status$trigger()
+    })
+    
     output$plot <- shiny::renderText(title()$plot)
     
     shiny::observe({
         if (title()$type == "series") {
-            shinyjs::show(selector = "#title_season")
+            shinyjs::hide("movie")
+            shinyjs::show("season")
+        } else {
+            shinyjs::hide("season")
+            shinyjs::show("movie")
         }
     })
     
-    shiny::callModule(season, "season", user_id, title_id)
+    season <- shiny::callModule(season, "season", user_id, title_id)
+    
+    # Return value is the season. Only if it is a series.
+    shiny::reactive({
+        shiny::validate(
+            shiny::need(title()$type == "series", 
+                        message = "Title has to be a series to have a season")
+        )
+
+        season()
+    })
 }
 
 title_UI <- function(id) {
     ns <- shiny::NS(id)
-    
+
     shiny::tags$div(
         id = "title",
         shiny::uiOutput(ns("header")),
@@ -44,21 +101,39 @@ title_UI <- function(id) {
             shiny::column(
                 9,
                 shiny::fluidRow(
+                    class = "plot",
                     shiny::column(
                         12,
                         shiny::textOutput(ns("plot"))
                     )
                 ),
                 shiny::fluidRow(
+                    class = "checkbox",
+                    shiny::column(
+                        12,
+                        shiny::checkboxInput(ns("prefer_full_hd"), 
+                                             "Prefer Full HD")
+                    )
+                ),
+                shiny::fluidRow(
                     shiny::column(
                         12,
                         shinyjs::hidden(
-                            shiny::tags$div(id = "title_season",
-                                            season_UI(ns("season")))
+                            shiny::tags$div(
+                                id = ns("season"),
+                                season_UI(ns("season"))
+                            )
+                        ),
+                        shinyjs::hidden(
+                            shiny::tags$div(
+                                id = ns("movie"),
+                                shiny::uiOutput(ns("button"))
+                            )
                         )
                     )
                 )
             )
         )
     )
+
 }

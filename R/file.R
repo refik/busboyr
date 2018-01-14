@@ -15,7 +15,9 @@ create_file <- function(download_id) {
     
     # Since we only call this function after a complete callback from put.io
     # download has to be completed.
-    assert_that(api_transfer$status == "COMPLETED")
+    assert_that(api_transfer$status == "COMPLETED", msg = glue(
+        "Transfer status is ", "{api_transfer$status}", " rather then COMPLETE"
+    ))
 
     if (!is.null(download$season)) {
         logger("Download is for a series season:{season}")

@@ -1,4 +1,11 @@
 function(request) {
+    query <- shiny::parseQueryString(request$QUERY_STRING)
+    page <- query$page
+    if (is.null(page)) {
+        # Default page
+        page <- "search"
+    }
+    
     shiny::tagList(
         tags$head(
             tags$script(src = "js.cookie.min.js"),
@@ -16,8 +23,8 @@ function(request) {
         shinyjs::useShinyjs(),
         shiny::navbarPage(
             title = shiny::tags$img(src = "logo.png"), 
-            theme = "paper_theme.css", selected = "account", 
-            id = "busboy_navbar", windowTitle = "Busboy", fluid = FALSE,
+            theme = "paper_theme.css", selected = page, 
+            id = "navbar", windowTitle = "Busboy", fluid = FALSE,
             shiny::tabPanel("Account", value = "account",
                             account_UI("account"),
                             page_header_title("UI Request Object"),
@@ -26,7 +33,7 @@ function(request) {
                                       collapse = "\n")
                             )),
             shiny::tabPanel("Search", value = "search",
-                            search_UI("search")),
+                            search_UI("search", query = query$query)),
             shiny::tabPanel("Title Information", value = "title",
                             title_UI("title"))
         )

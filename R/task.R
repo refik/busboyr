@@ -1,4 +1,8 @@
-task_queue_name <- "busboy_task"
+if (Sys.getenv("BUSBOY_ENV") == "LOCAL") {
+    task_queue_name <- "task_local"
+} else {
+    task_queue_name <- "task"
+}
 
 #' Creates a task for busboy.io workers
 #' 
@@ -34,8 +38,12 @@ consume_task <- function(wait = NULL) {
     arguments <- message_json$arguments
 
     # Calling the task function
-    do.call(task_function, arguments)
+    try(
+        shiny::withLogErrors(
+            do.call(task_function, arguments)
+        )
+    )
     
-    logger("Task completed successfully. Deleting the handle.")
+    logger("Task consumed. Deleting the handle.")
     aws.sqs::delete_msg(task_queue_name, sqs_message$ReceiptHandle)
 }

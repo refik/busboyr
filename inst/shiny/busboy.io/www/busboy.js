@@ -4,7 +4,7 @@ function limit_session_time(duration) {
     }, duration);
 }
 
-function setup_search_query(query_input, button_input) {
+function setup_search_bar(query_input, button_input) {
     query_element = $("#" + query_input);
     query_element.prop("autofocus", true);
     query_element.focus();
@@ -56,22 +56,11 @@ function sqs_long_poll(queue_url) {
     }, dataType: "xml"});
 }
 
-function setup_event_button() {
-    $('body').on('click', '.event-button', function() {
-        // Trigger tab change
-        tab_name = $(this).data('open-tab');
-    
-        if (tab_name !== '') {
-            // This is so that the reactive expression is triggered everytime
-            // the button is pressed.
-            time = (new Date()).getTime();
-            tab_name_time = tab_name + '/' + time.toString();
-            Shiny.onInputChange('open_tab', tab_name_time);
-        }
-    
+function setup_input_button() {
+    $('body').on('click', '.input-button', function() {
         // Send custom data value to shiny
-        trigger_data_input = $(this).data('trigger-input-name');
-        trigger_data_value = $(this).data('trigger-input-value');
-        Shiny.onInputChange(trigger_data_input, trigger_data_value);
+        input_name = $(this).data('input-name');
+        input_value = $(this).data('input-value');
+        Shiny.onInputChange(input_name, input_value);
     });
 }
