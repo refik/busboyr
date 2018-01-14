@@ -27,6 +27,10 @@ function(request) {
             id = "navbar", windowTitle = "Busboy", fluid = FALSE,
             shiny::tabPanel("Account", value = "account",
                             account_UI("account"),
+                            shiny::tags$pre(
+                                style = "margin-top: 1em",
+                                glue("Busboy Environment: {Sys.getenv('BUSBOY_ENV')}")
+                            ),
                             page_header_title("UI Request Object"),
                             shiny::tags$pre(
                                 paste(utils::capture.output(print(as.list(request))), 
