@@ -28,14 +28,18 @@ function(request) {
             shiny::tabPanel("Account", value = "account",
                             account_UI("account"),
                             shiny::tags$pre(
-                                style = "margin-top: 1em",
+                                style = "margin-top: 2em",
                                 glue("Busboy Environment: {Sys.getenv('BUSBOY_ENV')}")
                             ),
-                            page_header_title("UI Request Object"),
-                            shiny::tags$pre(
-                                paste(utils::capture.output(print(as.list(request))), 
-                                      collapse = "\n")
-                            )),
+                            if (Sys.getenv("BUSBOY_ENV") != "PROD") {
+                                shiny::tagList(
+                                    page_header_title("UI Request Object"),
+                                    shiny::tags$pre(
+                                        paste(utils::capture.output(print(as.list(request))), 
+                                              collapse = "\n")
+                                    )
+                                )
+                            }),
             shiny::tabPanel("Search", value = "search",
                             search_UI("search", query = query$query)),
             shiny::tabPanel("Title Information", value = "title",
