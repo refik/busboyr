@@ -14,7 +14,7 @@ create_task <- function(task_function, arguments) {
         as.character() %>% 
         aws.sqs::send_msg(Sys.getenv("TASK_QUEUE"), .)
     
-    logger(glue("Task sent to queue:{Sys.getenv("TASK_QUEUE")}"))
+    logger(glue("Task sent to queue:{Sys.getenv('TASK_QUEUE')}"))
 }
 
 #' Consumes a given task
