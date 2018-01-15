@@ -79,7 +79,9 @@ search <- function(input, output, session, user_id) {
         title_id = title_id,
         query = shiny::reactive({
             search_result()
-            input$query
+            query <- shiny::isolate(input$query)
+            shiny::validate(shiny::need(query, label = "input$query"))
+            query
         })
     )
 }
