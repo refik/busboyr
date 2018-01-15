@@ -37,6 +37,7 @@
     margin-left: auto;
     margin-right: auto;
     display: block;
+    max-width: 100%;
 }
 
 #search .poster-background {

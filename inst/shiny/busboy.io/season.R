@@ -73,7 +73,6 @@ season <- function(input, output, session, user_id, title_id, refresh) {
         # This will be triggered from sqs when a download
         # is complete
         refresh$depend(glue("title:{title_id()}-{season()}"))
-        
         episodes <- busboyr::season_status(user_id(), title_id(), 
                                            season()) %>% 
             dplyr::collect()

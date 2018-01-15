@@ -16,7 +16,7 @@ function(input, output, session) {
     shiny::observe({
         # Updating refresh reactive values
         shiny::validate(shiny::need(input$refresh, message = "Refresh key missing"))
-        key <- stringr::str_extract(input$refresh, "[a-z0-9:]+(?=|[0-9]+$)")
+        key <- stringr::str_extract(input$refresh, "^[^|]+(?=|[0-9]+$)")
         refresh$trigger(key)
     })
     
