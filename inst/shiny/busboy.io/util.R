@@ -17,14 +17,14 @@ bind_refresh <- function(session, channel) {
 # Concept taken from
 # https://github.com/daattali/advanced-shiny/tree/master/reactive-trigger
 reactive_trigger <- function() {
-    rv <- shiny::reactiveValues(a = 0)
+    rv <- shiny::reactiveValues()
     list(
-        depend = function() {
-            rv$a
+        depend = function(name) {
+            rv[[name]]
             invisible()
         },
-        trigger = function() {
-            rv$a <- shiny::isolate(rv$a + 1)
+        trigger = function(name) {
+            rv[[name]] <- Sys.time()
         }
     )
 }

@@ -42,8 +42,6 @@ episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
 }
 
 season <- function(input, output, session, user_id, title_id) {
-    refresh_episode <- reactive_trigger()
-    
     output$season_tab <- shiny::renderUI({
         seasons <- busboyr::title_season(title_id())
         tabset_id <- session$ns("season_tab")
@@ -72,9 +70,6 @@ season <- function(input, output, session, user_id, title_id) {
     })
     
     output$episode <- shiny::renderUI({
-        # Binding refresh
-        refresh_episode$depend()
-
         # This will be triggered from sqs when a download
         # is complete
         input$refresh
@@ -102,7 +97,6 @@ season <- function(input, output, session, user_id, title_id) {
         )
         
         # Refreshing episodes to display the status update
-        refresh_episode$trigger()
     })
     
     season

@@ -27,8 +27,6 @@ start_download <- function(user_id, request_id, name, source,
         id
     })
     
-    refresh_shiny(user_id)
-    
-    id
+    refresh_title(user_id, title_id, season)
 }
 

@@ -20,13 +20,23 @@ search <- function(input, output, session, user_id) {
             query <- shiny::getQueryString()$query
         }
         
+        # If nothing is searched yet, display users files if they have any
+        if (!is.null(query) && query == "") {
+            result <- busboyr::get_user_title(user_id())
+            if (!is.null(result)) {
+                return(result)
+            }
+        }
+        
         shiny::validate(
             shiny::need(query, 
                         message = "Please enter a title name to search")
         )
-        
+
         # This is only necessary for query string
-        query <- stringr::str_replace_all(query, "\\+", " ")
+        query <- query %>% 
+            trimws() %>% 
+            stringr::str_replace_all("\\+", " ")
         
         result <- busboyr::search_title(query)
         
@@ -42,7 +52,7 @@ search <- function(input, output, session, user_id) {
     
     output$result <- shiny::renderUI({
         # Taking the first n, its mostly enough
-        titles <- head(search_result(), 8)
+        titles <- search_result()
         
         title_cards <- purrr::pmap(titles, title_search_card, 
                                    input_name = session$ns("title_id"))

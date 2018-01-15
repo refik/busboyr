@@ -4,7 +4,7 @@
 \alias{create_request}
 \title{Request a title to download}
 \usage{
-create_request(user_id, title_id, prefer_full_hd = FALSE, season = NULL)
+create_request(user_id, title_id, season = NULL)
 }
 \description{
 Request a title to download

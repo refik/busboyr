@@ -40,7 +40,7 @@ function sqs_long_poll(queue_url) {
             } else {
                 // Triggering the shiny input sent from the message
                 time = (new Date()).getTime();
-                Shiny.onInputChange(message, time);
+                Shiny.onInputChange("refresh", message + "|" + time);
                 console.log("Triggered shiny input");
             }
             

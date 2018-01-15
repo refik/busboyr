@@ -1,6 +1,5 @@
 function(input, output, session) {
-    session$userData$reactive <- shiny::reactiveValues()
-    session$userData$refresh <- shiny::reactiveValues()
+    refresh <- reactive_trigger()
     
     shinyjs::runjs("setup_input_button()")
     
@@ -12,7 +11,14 @@ function(input, output, session) {
     search <- shiny::callModule(search, "search", user_id)
     title_id <- search$title_id
     search_query <- search$query
-    season <- shiny::callModule(title, "title", user_id, title_id)
+    season <- shiny::callModule(title, "title", user_id, title_id, refresh = refresh)
+    
+    shiny::observe({
+        # Updating refresh reactive values
+        shiny::validate(shiny::need(input$refresh, message = "Refresh key missing"))
+        key <- stringr::str_extract(input$refresh, "[a-z0-9:]+(?=|[0-9]+$)")
+        refresh$trigger(key)
+    })
     
     navigate <- function(tab_value) {
         shiny::updateNavbarPage(

@@ -15,8 +15,9 @@ create_file <- function(download_id) {
     
     # Since we only call this function after a complete callback from put.io
     # download has to be completed.
-    assert_that(api_transfer$status == "COMPLETED", msg = glue(
-        "Transfer status is ", "{api_transfer$status}", " rather then COMPLETE"
+    assert_that(api_transfer$status %in% c("SEEDING", "COMPLETED"), msg = glue(
+        "Transfer status is ", "{api_transfer$status} ", 
+        "rather then SEEDING or COMPLETE"
     ))
 
     if (!is.null(download$season)) {
@@ -64,6 +65,7 @@ create_file <- function(download_id) {
             insert_row("file", list(
                 id = id,
                 original_name = original_name,
+                user_id = user_id,
                 name = name,
                 title_id = download$title_id,
                 download_id = download$id,
@@ -77,5 +79,19 @@ create_file <- function(download_id) {
         putio_files_delete(user_id, api_transfer$file_id)
     })
     
-    refresh_shiny(download$user_id)
+    refresh_title(download$user_id, download$title_id, download$season)
+}
+
+#' Get all files of the user
+#' 
+#' @export
+get_user_title <- function(user_id) {
+    title_id <- get_table("file") %>% 
+        dplyr::filter(user_id == !!user_id) %>% 
+        dplyr::distinct(title_id) %>% 
+        dplyr::pull()
+    
+    if (length(title_id) != 0) {
+        purrr::map_dfr(title_id, get_title)
+    }
 }

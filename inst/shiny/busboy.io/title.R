@@ -1,4 +1,5 @@
-title <- function(input, output, session, user_id, title_id) {
+title <- function(input, output, session, user_id, title_id, 
+                  refresh = shiny::reactiveValues()) {
     title <- shiny::reactive({
         title <- busboyr::get_title(title_id())
         prefer_full_hd <- busboyr::get_full_hd(user_id(), title_id())
@@ -8,13 +9,10 @@ title <- function(input, output, session, user_id, title_id) {
     })
     
     shiny::observeEvent(input$prefer_full_hd, {
-        user_id <- shiny::isolate(user_id())
-        title_id <- shiny::isolate(title_id())
-        
         if (input$prefer_full_hd == TRUE) {
-            busboyr::set_full_hd(user_id, title_id)
+            busboyr::set_full_hd(user_id(), title_id())
         } else {
-            busboyr::unset_full_hd(user_id, title_id)
+            busboyr::unset_full_hd(user_id(), title_id())
         }
     })
 
@@ -29,11 +27,9 @@ title <- function(input, output, session, user_id, title_id) {
         )
     })
 
-    refresh_status <- reactive_trigger()
-    
     output$button <- shiny::renderUI({
         title <- busboyr::title_status(user_id(), title_id())
-        refresh_status$depend()
+        refresh$depend(glue("title:{title_id()}"))
 
         switch(title$status,
             has_request = shiny::tags$span("Finding", class = "blink"),
@@ -59,7 +55,7 @@ title <- function(input, output, session, user_id, title_id) {
             shiny::isolate(title_id())
         )
         
-        refresh_status$trigger()
+        refresh$trigger(glue("title:{title_id()}"))
     })
     
     output$plot <- shiny::renderText(title()$plot)

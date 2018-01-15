@@ -1,9 +1,3 @@
-if (Sys.getenv("BUSBOY_ENV") == "LOCAL") {
-    task_queue_name <- "task_local"
-} else {
-    task_queue_name <- "task"
-}
-
 #' Creates a task for busboy.io workers
 #' 
 #' @export
@@ -15,10 +9,12 @@ create_task <- function(task_function, arguments) {
         arguments = arguments
     )
     
-    task_definition %>% 
+    sqs_resp <- task_definition %>% 
         jsonlite::toJSON(auto_unbox = TRUE) %>% 
         as.character() %>% 
-        aws.sqs::send_msg(task_queue_name, .)
+        aws.sqs::send_msg(Sys.getenv("TASK_QUEUE"), .)
+    
+    logger(glue("Task sent to queue:{Sys.getenv("TASK_QUEUE")}"))
 }
 
 #' Consumes a given task
@@ -26,7 +22,7 @@ create_task <- function(task_function, arguments) {
 #' @export
 consume_task <- function(wait = NULL) {
     logger <- get_logger("consume_task")
-    sqs_message <- aws.sqs::receive_msg(task_queue_name, wait = wait)
+    sqs_message <- aws.sqs::receive_msg(Sys.getenv("TASK_QUEUE"), wait = wait)
     
     if (nrow(sqs_message) == 0) {
         logger("No message in task queue.")
@@ -45,5 +41,5 @@ consume_task <- function(wait = NULL) {
     )
     
     logger("Task consumed. Deleting the handle.")
-    aws.sqs::delete_msg(task_queue_name, sqs_message$ReceiptHandle)
+    aws.sqs::delete_msg(Sys.getenv("TASK_QUEUE"), sqs_message$ReceiptHandle)
 }

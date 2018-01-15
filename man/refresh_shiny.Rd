@@ -2,10 +2,10 @@
 % Please edit documentation in R/callback.R
 \name{refresh_shiny}
 \alias{refresh_shiny}
-\title{Notify user about updates}
+\title{Send a message to users session}
 \usage{
-refresh_shiny(user_id)
+refresh_shiny(user_id, message)
 }
 \description{
-Notify user about updates
+Send a message to users session
 }
