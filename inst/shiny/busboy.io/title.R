@@ -1,5 +1,5 @@
 title <- function(input, output, session, user_id, title_id, 
-                  refresh = shiny::reactiveValues()) {
+                  refresh) {
     title <- shiny::reactive({
         title <- busboyr::get_title(title_id())
         prefer_full_hd <- busboyr::get_full_hd(user_id(), title_id())
@@ -70,7 +70,7 @@ title <- function(input, output, session, user_id, title_id,
         }
     })
     
-    season <- shiny::callModule(season, "season", user_id, title_id)
+    season <- shiny::callModule(season, "season", user_id, title_id, refresh)
     
     # Return value is the season. Only if it is a series.
     shiny::reactive({
