@@ -18,6 +18,11 @@ function(request) {
                 <link rel="manifest" href="/manifest.json">
                 <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#b53131">
                 <meta name="theme-color" content="#ffffff">
+            '),
+            shiny::HTML('
+                <script async src="https://s.tagove.com/a-69836/init.js"></script>
+                <script async src="https://s.tagove.com/main.js"></script>
+                <noscript><a href="https://www.tagove.com?welcome" title="live chat software">Website chat software</a></noscript>
             ')
         ),
         shinyjs::useShinyjs(),

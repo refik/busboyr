@@ -4,13 +4,15 @@ omdb_api_url <- "https://www.omdbapi.com"
 #' 
 #' @export
 omdb_search <- function(query, ...) {
-    response <- httr::GET(
+    response <- httr::RETRY(
+        "GET",
         omdb_api_url,
         query = list(
             apikey = Sys.getenv("OMDB_APIKEY"),
             s = query
         ),
-        httr::timeout(2)
+        httr::timeout(2), 
+        times = 5
     )
     
     save_api(response, ...)
