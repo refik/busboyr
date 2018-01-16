@@ -139,7 +139,7 @@ account <- function(input, output, session) {
     })
     
     shiny::observeEvent(input$signin, {
-        putio_auth_url <- busboyr::putio_oauth_redirect_url(session$request$HTTP_ORIGIN)
+        putio_auth_url <- busboyr::putio_oauth_redirect_url()
         shinyjs::runjs(glue("window.location = '{putio_auth_url}'"))
     })
     

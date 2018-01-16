@@ -16,18 +16,14 @@ putio_get_token <- memoise::memoise(function(user_id) {
 #' put.io auth url for busboy
 #' 
 #' @export
-putio_oauth_redirect_url <- function(redirect_url = NULL) {
-    if (is.null(redirect_url)) {
-        redirect_url <- "http://dev.busboy.io"
-    }
-    
+putio_oauth_redirect_url <- function() {
     httr::modify_url(
         putio_api_url,
         path = "v2/oauth2/authenticate",
         query = list(
-            client_id = "3140",
+            client_id = Sys.getenv("PUTIO_CLIENT_ID"),
             response_type = "token",
-            redirect_uri = redirect_url
+            redirect_uri = Sys.getenv("PUTIO_REDIRECT_URL")
         )
     )
 }

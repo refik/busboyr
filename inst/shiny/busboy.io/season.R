@@ -12,7 +12,9 @@ season_UI <- function(id) {
 }
 
 episode_line <- function(episode, name, duration_minute, file_id, status, ...) {
-    duration_friendly <- glue("{duration_minute} MIN")
+    if (!is.na(duration_minute)) duration_friendly <- glue("{duration_minute} MIN")
+    else duration_friendly <- ""
+
     shiny::fluidRow(
         shiny::column(1, shiny::tags$span(class = "number", episode)),
         shiny::column(6, shiny::tags$span(class = "name", name)),

@@ -22,7 +22,7 @@ get_folder <- function(user_id, type, title_id = NULL, season = NULL) {
         logger("Folder not found. Creating it.")
         
         folder_def <- list(
-            root = list(name = "Busboy"),
+            root = list(name = Sys.getenv("ROOT_FOLDER")),
             season = list(parent = "series", type = "season"),
             series = list(parent = "series_root", type = "series"),
             buffer = list(parent = "root", name = "Files to Organize", type = "buffer"),

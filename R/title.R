@@ -3,7 +3,8 @@
 #' @export
 tbl_episode <- function(title_id, season = NULL, ...) {
     episode <- get_table("title", ...) %>% 
-        dplyr::filter(parent_id == !!title_id, !is.na(duration_minute)) %>%
+        # dplyr::filter(parent_id == !!title_id, !is.na(duration_minute)) %>%
+        dplyr::filter(parent_id == !!title_id) %>%
         dplyr::arrange(season, episode)
     
     if (!is.null(season)) {
@@ -39,7 +40,7 @@ get_title <- function(title_id) {
         id = title_id,
         name = api$Title,
         type = api$Type,
-        year = api$Year,
+        year = as.integer(substr(api$Year, 0, 4)),
         plot = api$Plot,
         poster = ifelse(api$Poster == "N/A", NA_character_, api$Poster)
     )
