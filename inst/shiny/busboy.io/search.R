@@ -44,13 +44,19 @@ search <- function(input, output, session, user_id) {
             shiny::need(!is.null(result), message = "Couldn't find any title.")
         )
         
-        result %>% 
+        result <- result %>% 
             # Decreasing the size of posters for search results
             dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150")) %>% 
             dplyr::filter(!is.na(poster)) %>% 
             
             # Limiting search results to 8
             head(8)
+        
+        shiny::validate(
+            shiny::need(nrow(result) > 0, message = "No title to show.")
+        )
+        
+        result
     })
     
     output$result <- shiny::renderUI({
