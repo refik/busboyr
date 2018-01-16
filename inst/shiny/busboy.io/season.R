@@ -63,7 +63,7 @@ season <- function(input, output, session, user_id, title_id, refresh) {
         season <- input$season_tab
         
         shiny::validate(
-            shiny::need(season, message = "Finding seasons...")
+            shiny::need(season, message = "No aired episodes found for the series.")
         )
         
         as.integer(season)
