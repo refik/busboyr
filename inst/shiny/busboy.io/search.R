@@ -47,11 +47,13 @@ search <- function(input, output, session, user_id) {
         result %>% 
             # Decreasing the size of posters for search results
             dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150")) %>% 
-            dplyr::filter(!is.na(poster))
+            dplyr::filter(!is.na(poster)) %>% 
+            
+            # Limiting search results to 8
+            head(8)
     })
     
     output$result <- shiny::renderUI({
-        # Taking the first n, its mostly enough
         titles <- search_result()
         
         title_cards <- purrr::pmap(titles, title_search_card, 
