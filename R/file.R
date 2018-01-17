@@ -88,6 +88,7 @@ create_file <- function(download_id) {
 get_user_title <- function(user_id) {
     title_id <- get_table("file") %>% 
         dplyr::filter(user_id == !!user_id) %>% 
+        dplyr::arrange(desc(id)) %>% 
         dplyr::distinct(title_id) %>% 
         dplyr::pull()
     

@@ -57,6 +57,10 @@
     margin-bottom:2em;
 }
 
+#title .play-movie {
+    width: 8em;
+}
+
 /* Season module */
 #season {
     margin-bottom: 3em;
@@ -112,6 +116,7 @@ body {
 }
 
 .blink {
+  color: #b53131;
   animation: fade 1500ms infinite;
   -webkit-animation: fade 1500ms infinite;
   -moz-animation: fade 1500ms infinite;

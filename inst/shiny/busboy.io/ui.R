@@ -3,7 +3,7 @@ function(request) {
     page <- query$page
     if (is.null(page)) {
         # Default page
-        page <- "search"
+        page <- "account"
     }
     
     shiny::tagList(
@@ -32,9 +32,11 @@ function(request) {
             id = "navbar", windowTitle = "Busboy", fluid = FALSE,
             shiny::tabPanel("Account", value = "account",
                             account_UI("account"),
-                            shiny::tags$pre(
-                                style = "margin-top: 2em",
-                                glue("Busboy Environment: {Sys.getenv('BUSBOY_ENV')}")
+                            shinyjs::hidden(
+                                shiny::tags$pre(
+                                    style = "margin-top: 2em",
+                                    glue("Busboy Environment: {Sys.getenv('BUSBOY_ENV')}")
+                                )
                             ),
                             if (Sys.getenv("BUSBOY_ENV") != "PROD") {
                                 shiny::tagList(

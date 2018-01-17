@@ -34,6 +34,14 @@ function(input, output, session) {
         navigate("title")
     })
     
+    # If there is a change in title_id, navigate to title page
+    shiny::observe({
+        user_id()
+        if (shiny::isolate(input$navbar) == "account") {
+            navigate("search")
+        }
+    })
+    
     # If navbar is clicked and the page is changed, push the change to history and
     # add it as a query string
     shiny::observe({

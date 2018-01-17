@@ -37,7 +37,7 @@ title <- function(input, output, session, user_id, title_id,
             has_file = shiny::tags$a(
                 type = "button",
                 target = "_blank",
-                class = "btn btn-primary",
+                class = "btn btn-primary play-movie",
                 href = busboyr::putio_file_link(title$file_id),
                 shiny::tags$span(class = "glyphicon glyphicon-play")
             ),
@@ -70,6 +70,19 @@ title <- function(input, output, session, user_id, title_id,
         }
     })
     
+    output$error <- shiny::renderUI({
+        # To check if title is visible.
+        tryCatch({
+            title()
+            shinyjs::hide("error")
+            shinyjs::show(selector = "#title")
+        }, error = function(e) {
+            shinyjs::hide(selector = "#title")
+            shinyjs::show("error")
+            stop(e)
+        })
+    })
+    
     season <- shiny::callModule(season, "season", user_id, title_id, refresh)
     
     # Return value is the season. Only if it is a series.
@@ -86,44 +99,49 @@ title <- function(input, output, session, user_id, title_id,
 title_UI <- function(id) {
     ns <- shiny::NS(id)
 
-    shiny::tags$div(
-        id = "title",
-        shiny::uiOutput(ns("header")),
-        shiny::fluidRow(
-            shiny::column(
-                3,
-                shiny::uiOutput(ns("poster"))
-            ),
-            shiny::column(
-                9,
-                shiny::fluidRow(
-                    class = "plot",
-                    shiny::column(
-                        12,
-                        shiny::textOutput(ns("plot"))
-                    )
-                ),
-                shiny::fluidRow(
-                    class = "checkbox",
-                    shiny::column(
-                        12,
-                        shiny::checkboxInput(ns("prefer_full_hd"), 
-                                             "Prefer Full HD")
-                    )
-                ),
+    shiny::tagList(
+        shiny::uiOutput(ns("error")),
+        shinyjs::hidden(
+            shiny::tags$div(
+                id = "title",
+                shiny::uiOutput(ns("header")),
                 shiny::fluidRow(
                     shiny::column(
-                        12,
-                        shinyjs::hidden(
-                            shiny::tags$div(
-                                id = ns("season"),
-                                season_UI(ns("season"))
+                        3,
+                        shiny::uiOutput(ns("poster"))
+                    ),
+                    shiny::column(
+                        9,
+                        shiny::fluidRow(
+                            class = "plot",
+                            shiny::column(
+                                12,
+                                shiny::textOutput(ns("plot"))
                             )
                         ),
-                        shinyjs::hidden(
-                            shiny::tags$div(
-                                id = ns("movie"),
-                                shiny::uiOutput(ns("button"))
+                        shiny::fluidRow(
+                            class = "checkbox",
+                            shiny::column(
+                                12,
+                                shiny::checkboxInput(ns("prefer_full_hd"), 
+                                                     "Prefer Full HD")
+                            )
+                        ),
+                        shiny::fluidRow(
+                            shiny::column(
+                                12,
+                                shinyjs::hidden(
+                                    shiny::tags$div(
+                                        id = ns("season"),
+                                        season_UI(ns("season"))
+                                    )
+                                ),
+                                shinyjs::hidden(
+                                    shiny::tags$div(
+                                        id = ns("movie"),
+                                        shiny::uiOutput(ns("button"))
+                                    )
+                                )
                             )
                         )
                     )

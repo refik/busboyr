@@ -55,7 +55,10 @@ account_UI <- function(id) {
                     )
                 ),
                 shiny::fluidRow(
-                    shiny::uiOutput(ns("support_mail"))
+                    shiny::column(
+                        12,
+                        shiny::uiOutput(ns("support_mail"))
+                    )
                 )
             )
         )
