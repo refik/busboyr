@@ -1,0 +1,2 @@
+#!/usr/bin/env Rscript
+busboyr::write_imdb()

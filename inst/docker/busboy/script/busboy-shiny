@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Making sure the logging folder exists
+mkdir /home/shiny/busboy-log
+
+# Env variables are not picked up by the processes started
+# by shiny-server
+echo BUSBOY_ENV="$BUSBOY_ENV" > ~/.Renviron
+
+# Start shiny as a deamon and tail the output to log folder
+start-stop-daemon -C --start --quiet --background \
+    --exec /usr/bin/shiny-server \
+    > /home/shiny/busboy-log/shiny-server.log 2>&1
+
+# Tail all the logs
+retail /home/shiny/busboy-log
