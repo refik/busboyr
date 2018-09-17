@@ -13,14 +13,13 @@
 }
 
 /* Search module */
-#search .bar {
-    /* margin-top: 6em; */
-}
-
 #search .result {
     margin-top: 1em;
 }
 
+#search .has-file {
+    border-color: #b53131;
+}
 #search .title-info {
     width: 100%;
     white-space: nowrap;

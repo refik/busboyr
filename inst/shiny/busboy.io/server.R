@@ -1,4 +1,5 @@
 function(input, output, session) {
+    logger <- busboyr::get_logger("root", shiny = TRUE)
     refresh <- reactive_trigger()
     
     shinyjs::runjs("setup_input_button()")
@@ -39,6 +40,8 @@ function(input, output, session) {
         user_id()
         if (shiny::isolate(input$navbar) == "account") {
             navigate("search")
+            logger(glue("Authenticated user:{user_id()}. ", 
+                        "Navigating to page:search."))
         }
     })
     

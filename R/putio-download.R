@@ -25,9 +25,10 @@ bind_putio_download <- function(tbl) {
         dplyr::collect() %>% 
         dplyr::mutate_at("download_count", as.integer)
     
-    logger(
-        glue("Binding {nrow(download_count)} download_count to {nrow(tbl)} row table")
-    )
+    logger(glue(
+        "Binding {nrow(download_count)} download_count(s) from put.io", 
+        " to {nrow(tbl)} row table."
+    ))
     
     dplyr::left_join(tbl, download_count, by = "hash") %>% 
         dplyr::mutate(on_putio = !is.na(download_count))

@@ -4,7 +4,8 @@
 \alias{get_folder}
 \title{Get busboy folders file_id on put.io}
 \usage{
-get_folder(user_id, type, title_id = NULL, season = NULL)
+get_folder(user_id, type, title_id = NULL, season = NULL,
+  refresh_shiny = FALSE)
 }
 \description{
 Get busboy folders file_id on put.io

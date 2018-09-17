@@ -20,11 +20,14 @@ search <- function(input, output, session, user_id) {
             query <- shiny::getQueryString()$query
         }
         
+        user_title_id <- busboyr::get_user_title_id(user_id())
+        
         # If nothing is searched yet, display users files if they have any
         if (!is.null(query) && query == "") {
-            result <- busboyr::get_user_title(user_id())
+            result <- busboyr::tbl_get_title(user_title_id)
+
             if (!is.null(result)) {
-                return(result)
+                return(dplyr::mutate(result, has_file = TRUE))
             }
         }
         
@@ -46,7 +49,8 @@ search <- function(input, output, session, user_id) {
         
         result <- result %>% 
             # Decreasing the size of posters for search results
-            dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150")) %>% 
+            dplyr::mutate(poster = stringr::str_replace(poster, "SX300", "SX150"),
+                          has_file = id %in% user_title_id) %>% 
             dplyr::filter(!is.na(poster)) %>% 
             
             # Limiting search results to 8
@@ -94,11 +98,17 @@ search <- function(input, output, session, user_id) {
     )
 }
 
-title_search_card <- function(name, type, year, id, poster, input_name, ...) {
+title_search_card <- function(name, type, year, id, poster, input_name, has_file, ...) {
+    class <- "thumbnail"
+    
+    if (has_file == TRUE) {
+        class <- paste(class, "has-file")
+    }
+    
     extended_column(
         middle_col = 3, 0, small_col = 6, 0,
         shiny::div(
-            class = "thumbnail",
+            class = class,
             shiny::div(
                 class = "poster-background",
                 shiny::img(src = poster, class = "poster")

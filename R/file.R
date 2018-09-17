@@ -2,7 +2,7 @@
 #' 
 #' @export
 create_file <- function(download_id) {
-    logger <- get_logger("create_file")
+    logger <- get_logger()
     
     download <- get_record("download", download_id)
     user_id <- download$user_id
@@ -74,6 +74,12 @@ create_file <- function(download_id) {
             ), con = con)
         })
         
+        # Setting completed_at of download
+        DBI::dbExecute(con, glue(
+            "UPDATE download SET completed_at = timezone('utc'::text, now()) ",
+            "WHERE id = {download_id}")
+        )
+        
         logger("Moving files and deleting unnecessary ones.")
         putio_files_move(user_id, download_file$id, parent_id)
         putio_files_delete(user_id, api_transfer$file_id)
@@ -82,17 +88,36 @@ create_file <- function(download_id) {
     refresh_title(download$user_id, download$title_id, download$season)
 }
 
-#' Get all files of the user
+#' Checking whether the titles files are still on put.io
 #' 
 #' @export
-get_user_title <- function(user_id) {
-    title_id <- get_table("file") %>% 
-        dplyr::filter(user_id == !!user_id) %>% 
-        dplyr::arrange(desc(id)) %>% 
-        dplyr::distinct(title_id) %>% 
-        dplyr::pull()
+check_title <- function(user_id, title_id) {
+    logger <- get_logger()
     
-    if (length(title_id) != 0) {
-        purrr::map_dfr(title_id, get_title)
+    # Getting the file of the title
+    file_id <- get_table("file") %>% 
+        dplyr::filter(user_id == !!user_id, title_id == !!title_id,
+                      is.na(missing_at)) %>% 
+        filter_last() %>% 
+        dplyr::pull(id)
+    
+    logger(glue("Found {length(file_id)} files for the title."))
+    
+    # If there is a file, checking on put.io
+    if (length(file_id) == 1) {
+        api <- putio_files_get(user_id, file_id)
+        logger(glue("Api status for file: {api$status}"))
+        
+        # If the file is gone from put.io, declaring it as missing
+        if (api$status == "ERROR" && api$status_code == 404) {
+            logger("Got 404 from the api for file, declaring missing on busboy")
+            DBI::dbExecute(db_pool(), glue(
+                "UPDATE file SET missing_at = timezone('utc'::text, now()) ",
+                "WHERE id = {file_id}")
+            )
+            
+            # Refreshing users shiny page
+            refresh_title(user_id, title_id)
+        }
     }
 }

@@ -41,7 +41,7 @@ download_imdb <- function(type = c("episode", "basics")) {
 #' 
 #' @export
 write_imdb <- function(episode_file = NULL, basics_file = NULL, ...) {
-    logger <- get_logger("imdb_write")
+    logger <- get_logger()
     
     if (is.null(episode_file)) {
         episode_file <- download_imdb("episode")

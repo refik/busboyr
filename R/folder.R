@@ -1,7 +1,8 @@
 #' Get busboy folders file_id on put.io
 #' 
 #' @export
-get_folder <- function(user_id, type, title_id = NULL, season = NULL) {
+get_folder <- function(user_id, type, title_id = NULL, season = NULL, 
+                       refresh_shiny = FALSE) {
     logger <- get_logger()
     
     folder <- get_table("folder") %>% 
@@ -18,7 +19,24 @@ get_folder <- function(user_id, type, title_id = NULL, season = NULL) {
         filter_last() %>% 
         dplyr::pull(id)
     
-    if (length(file_id) == 0) {
+    if (length(file_id) == 1) {
+        logger("There is a file. Checking if its still on put.io")
+        
+        api <- putio_files_get(user_id, file_id)
+        
+        if (api$status == "ERROR" && api$status_code == 404) {
+            logger("Got 404 from putio. File is gone.")
+            must_create_file <- TRUE
+        } else {
+            logger("There is a file and it is on put.io")
+            must_create_file <- FALSE
+        }
+    } else {
+        must_create_file <- TRUE
+        logger("There is no file.")
+    }
+    
+    if (must_create_file) {
         logger("Folder not found. Creating it.")
         
         folder_def <- list(

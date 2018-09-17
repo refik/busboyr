@@ -8,7 +8,10 @@ save_api <- function(response, user_id = NULL, ...) {
     response_json_text <- httr::content(response, "text", encoding = "UTF-8")
     to_json_text <- function(obj) as.character(jsonlite::toJSON(obj, auto_unbox = TRUE))
     
-    logger(glue("Got {response$status_code} from {parsed_url$hostname}"))
+    logger(glue(
+        "Response status:{response$status_code} for ", 
+        "host:{parsed_url$hostname}, path:{parsed_url$path}."
+    ))
     
     insert_row("api", list(
         hostname = parsed_url$hostname,
@@ -29,7 +32,8 @@ save_api <- function(response, user_id = NULL, ...) {
 #' 
 #' @export
 last_saved_json <- function(tbl) {
-    json <- tbl %>% 
+    json <- 
+        tbl %>% 
         filter_last() %>%
         dplyr::pull(json)
     

@@ -2,10 +2,10 @@
 % Please edit documentation in R/util.R
 \name{extract_episode}
 \alias{extract_episode}
-\title{Get episode from torrent}
+\title{Get episode from torrent name}
 \usage{
 extract_episode(name, season)
 }
 \description{
-Get episode from torrent
+Get episode from torrent name
 }

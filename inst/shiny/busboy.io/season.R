@@ -47,7 +47,6 @@ season <- function(input, output, session, user_id, title_id, refresh) {
     output$season_tab <- shiny::renderUI({
         seasons <- busboyr::title_season(title_id())
         tabset_id <- session$ns("season_tab")
-        message(shiny::getQueryString()$season)
         tabset_fn <- purrr::partial(shiny::tabsetPanel, id = tabset_id, 
                                     selected = shiny::getQueryString()$season)
 

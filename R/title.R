@@ -46,6 +46,15 @@ get_title <- function(title_id) {
     )
 }
 
+#' Get titles in a data frame
+#' 
+#' @export
+tbl_get_title <- function(title_id) {
+    if (!is.null(title_id) && length(title_id) > 0) {
+        purrr::map_dfr(title_id, get_title)
+    }
+}
+
 #' Search for an imdb title
 #' 
 #' @export
@@ -85,21 +94,28 @@ search_title <- function(name) {
 #' @export
 title_status <- function(user_id, title_id) {
     logger <- get_logger()
-    
+
     file_id <- get_table("file") %>% 
-        dplyr::filter(user_id == !!user_id, title_id == !!title_id) %>% 
+        dplyr::filter(user_id == !!user_id, title_id == !!title_id,
+                      is.na(missing_at)) %>% 
         filter_last() %>% 
         dplyr::pull(id)
     
+    if (length(file_id) != 1) {
+        file_id <- NULL
+    }
+    
     has_download <- get_table("download") %>% 
-        dplyr::filter(user_id == !!user_id, title_id == !!title_id) %>%
+        dplyr::filter(user_id == !!user_id, title_id == !!title_id,
+                      is.na(completed_at)) %>%
         pull_count() > 0 
     
     has_request <- get_table("request") %>% 
-        dplyr::filter(user_id == !!user_id, title_id == !!title_id) %>% 
+        dplyr::filter(user_id == !!user_id, title_id == !!title_id,
+                      is.na(completed_at)) %>% 
         pull_count() > 0
     
-    if (length(file_id) == 1) {
+    if (!is.null(file_id)) {
         status <- "has_file"
     } else if (has_download == TRUE) {
         status <- "has_download"
@@ -127,17 +143,17 @@ season_status <- function(user_id, title_id, season) {
 
         file <- get_table("file", con = con) %>% 
             dplyr::filter(user_id == !!user_id, title_id == !!title_id, 
-                          season == !!season) %>% 
+                          season == !!season, is.na(missing_at)) %>% 
             dplyr::select(file_id = "id", "episode")
 
         has_download <- get_table("download", con = con) %>% 
             dplyr::filter(user_id == !!user_id, title_id == !!title_id,
-                          season == !!season) %>%
+                          season == !!season, is.na(completed_at)) %>%
             pull_count() > 0 
 
         has_request <- get_table("request", con = con) %>% 
             dplyr::filter(user_id == !!user_id, title_id == !!title_id,
-                          season == !!season) %>% 
+                          season == !!season, is.na(completed_at)) %>% 
             pull_count() > 0
         
         logger("Joining all tables")
@@ -161,4 +177,24 @@ season_status <- function(user_id, title_id, season) {
             dplyr::arrange(episode)
     })
 
+}
+
+#' Get all files of the user
+#' 
+#' @export
+get_user_title <- function(user_id) {
+    user_id %>% 
+        get_user_title_id() %>% 
+        tbl_get_title()
+}
+
+#' Get title_id user has
+#' 
+#' @export
+get_user_title_id <- function(user_id) {
+    get_table("file") %>% 
+        dplyr::filter(user_id == !!user_id, is.na(missing_at)) %>% 
+        dplyr::arrange(desc(id)) %>% 
+        dplyr::distinct(title_id) %>% 
+        dplyr::pull()
 }

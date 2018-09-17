@@ -93,6 +93,22 @@ putio_files_list <- function(user_id = NULL, parent_id = 0,
     save_api(response, user_id)
 }
 
+#' Get users files
+#' 
+#' @export
+putio_files_get <- function(user_id = NULL, file_id,
+                             oauth_token = putio_get_token(user_id)) {
+    response <- httr::GET(
+        putio_api_url,
+        path = glue("v2/files/{file_id}"),
+        query = list(
+            oauth_token = oauth_token
+        )
+    )
+
+    save_api(response, user_id)
+}
+
 #' Create folder on put.io
 #' 
 #' @export

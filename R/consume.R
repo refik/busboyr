@@ -2,7 +2,7 @@
 #' 
 #' @export
 consume_loop <- function(queue = c("task", "callback", "both")) {
-    logger <- get_logger("consume_loop")
+    logger <- get_logger()
     
     fn <- list(
         task = consume_task,
@@ -12,7 +12,7 @@ consume_loop <- function(queue = c("task", "callback", "both")) {
             consume_task(wait = 1)
             consume_callback(wait = 1)
             logger("Sleeping for 2 seconds.")
-            Sys.sleep(2)
+            Sys.sleep(5)
         }
     )[[match.arg(queue)]]
 

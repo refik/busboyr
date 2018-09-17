@@ -23,7 +23,7 @@ start_download <- function(user_id, request_id, name, source,
             uuid = uuid
         ), con = con)
         
-        logger(glue("Created download {id}"))
+        logger(glue("Created download:{id}."))
         id
     })
     

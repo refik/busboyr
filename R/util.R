@@ -6,12 +6,7 @@ pre_pmap_int64 <- function(tbl) {
     dplyr::mutate_if(tbl, bit64::is.integer64, int64_vec_to_list)
 }
 
-#' Minute second of current time
-#' 
-#' @export
-now_short <- function() paste0(format(Sys.time(), format = "%M:%OS1"))
-
-#' Get episode from torrent
+#' Get episode from torrent name
 #' 
 #' @export
 extract_episode <- function(name, season) {
@@ -19,20 +14,18 @@ extract_episode <- function(name, season) {
     as.integer(stringr::str_extract(name, episode_regex))
 }
 
-#' Evaluate an expression
+#' Evaluate an expression and print result
 #' 
 #' @export
 eval_expression <- function(expression) {
-    logger <- get_logger("eval_expression")
+    logger <- get_logger()
     
-    result <- expression %>% 
+    expression %>% 
         parse(text = .) %>% 
-        eval()
-    
-    utils::capture.output(print(result)) %>% 
-        paste(collapse = "\n") %>% 
-        paste0("\n", .) %>% 
-        logger()
+        eval() %>% 
+        utils::capture.output() %>% 
+        purrr::map(logger) %>% 
+        invisible()
 }
 
 #' Number to imdb id text
@@ -48,4 +41,13 @@ to_imdb <- function(title_id) {
 #' @export
 from_imdb <- function(title_id) {
     as.integer(substr(title_id, 3, 9))
+}
+
+#' Converting a named list to character
+#' 
+#' @export
+log_named_list <- function(lst) {
+    name <- names(lst)
+    value <- purrr::map_chr(lst, as.character)
+    paste(name, value, sep = ":", collapse = ", ")
 }

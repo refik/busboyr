@@ -1,12 +1,34 @@
 title <- function(input, output, session, user_id, title_id, 
                   refresh) {
+    logger <- busboyr::get_logger("title", shiny = TRUE)
+    
     title <- shiny::reactive({
         title <- busboyr::get_title(title_id())
         prefer_full_hd <- busboyr::get_full_hd(user_id(), title_id())
         shiny::updateCheckboxInput(session, "prefer_full_hd",
                                    value = prefer_full_hd)
+        
+        # Checking titles file on put.io
+        file_id <- shiny::isolate(file_id())
+        if (title$type == "movie" && !is.null(file_id)) {
+            busboyr::create_task("check_title", list(
+                user_id = user_id(),
+                title_id = title_id()
+            ))
+        }
+        
+        logger(glue("Rendering title:{title_id()} for user:{user_id()}."))
+        
         title
     })
+    
+    status <- shiny::reactive({
+        refresh$depend(glue("title:{title_id()}"))
+        busboyr::title_status(user_id(), title_id())
+    })
+    
+    status_text <- shiny::reactive(status()$status)
+    file_id <- shiny::reactive(status()$file_id)
     
     shiny::observeEvent(input$prefer_full_hd, {
         if (input$prefer_full_hd == TRUE) {
@@ -28,17 +50,14 @@ title <- function(input, output, session, user_id, title_id,
     })
 
     output$button <- shiny::renderUI({
-        title <- busboyr::title_status(user_id(), title_id())
-        refresh$depend(glue("title:{title_id()}"))
-
-        switch(title$status,
+        switch(status_text(),
             has_request = shiny::tags$span("Finding", class = "blink"),
             has_download = shiny::tags$span("In Transfers", class = "blink"),
             has_file = shiny::tags$a(
                 type = "button",
                 target = "_blank",
                 class = "btn btn-primary play-movie",
-                href = busboyr::putio_file_link(title$file_id),
+                href = busboyr::putio_file_link(file_id()),
                 shiny::tags$span(class = "glyphicon glyphicon-play")
             ),
             

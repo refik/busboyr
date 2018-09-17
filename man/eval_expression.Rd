@@ -2,10 +2,10 @@
 % Please edit documentation in R/util.R
 \name{eval_expression}
 \alias{eval_expression}
-\title{Evaluate an expression}
+\title{Evaluate an expression and print result}
 \usage{
 eval_expression(expression)
 }
 \description{
-Evaluate an expression
+Evaluate an expression and print result
 }

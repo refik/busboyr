@@ -2,8 +2,12 @@
 #' 
 #' @export
 consume_callback <- function(wait = NULL) {
-    logger <- get_logger("consume_callback")
-    sqs_message <- aws.sqs::receive_msg(Sys.getenv("CALLBACK_QUEUE"), wait = wait)
+    logger <- get_logger()
+    
+    sqs_message <- aws.sqs::receive_msg(
+        Sys.getenv("CALLBACK_QUEUE"), 
+        wait = wait
+    )
     
     if (nrow(sqs_message) == 0) {
         logger("No message in callback queue.")
@@ -54,7 +58,9 @@ refresh_shiny <- function(user_id, message) {
     if (length(session_uuid) == 1) {
         queue_name <- paste("session", session_uuid, sep = "-")
         logger("Sending refresh signal to users shiny session.")
-        aws.sqs::send_msg(queue_name, message)
+        
+        # Not being able to send refresh is not a show stopper
+        try(aws.sqs::send_msg(queue_name, message))
     }
 }
 

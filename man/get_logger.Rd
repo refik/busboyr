@@ -4,7 +4,11 @@
 \alias{get_logger}
 \title{Get a logger function}
 \usage{
-get_logger(calling_fn_name = NULL, exclude_vars = character())
+get_logger(func_name = NULL)
+}
+\arguments{
+\item{func_name}{This value is inferred from the call stack. However,
+it is inferred wrong if the function is memoised.}
 }
 \description{
 Get a logger function
